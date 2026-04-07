@@ -1,0 +1,19 @@
+node_modules/
+.env
+.env.local
+.env.*.local
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+
+# Manual test scripts with hardcoded credentials/phone numbers
+test_admin_role.js
+test-call-simple.js
+test-dynamic-variables.js
+
+# Binary files
+*.docx
+*.pdf

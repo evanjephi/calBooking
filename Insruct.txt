@@ -1,0 +1,114 @@
+1 Create booking request - POST
+--Step 1 Request---
+POST /booking-requests
+body {
+  "city": "Toronto",
+  "postalCode": "M5H2N2"
+}
+
+2 Update step data - PATCH
+---Step 2 Location---
+PATCH /booking-requests/:id
+body {
+"location": {
+"city":"Toronto",
+"postalCode":"M5H2N2",
+"coordinates":[-79.3832,43.6532]
+}
+}
+
+---Step 3 Days Per Week---
+PATCH /booking-requests/:id
+{
+"daysPerWeek":3
+}
+
+---Step 4 Time of Day---
+{
+"timeOfDay":"daytime"
+}
+
+---Step 5 Visit Duration---
+{
+"visitDuration":"2-3 hours"
+}
+
+---Step 6 Length of Duration---
+{
+"lengthOfCareWeeks":8
+}
+
+--- Step 7 Contact Info ---
+{
+"contact":{
+"email":"client@email.com",
+"phone":"+16475551234"
+}
+}
+
+3 Check availability
+GET /booking-requests/:id/availability
+
+4 CREATE BLOCK SLOTS
+POST /booking-blocks
+{
+  "clientId": "client123",
+  "createdBy": "client",
+  "contact": {
+    "email": "client@email.com",
+    "phone": "+16475551234"
+  },
+  "slots": [
+    {
+      "pswWorker": "PSW_ID",
+      "startTime": "2026-04-12T10:00:00Z",
+      "endTime": "2026-04-12T13:00:00Z"
+    },
+    {
+      "pswWorker": "PSW_ID",
+      "startTime": "2026-04-14T10:00:00Z",
+      "endTime": "2026-04-14T13:00:00Z"
+    }
+  ]
+}
+
+
+PATCH /booking-requests/:id
+
+5 Test Schedule Conflict (Important)
+Try creating same time booking again.
+
+{
+  "pswWorker": "PSW_ID",
+  "startTime": "2026-04-12T10:00:00Z",
+  "endTime": "2026-04-12T13:00:00Z"
+}
+
+
+------------------------
+Client request
+      ↓
+BookingRequest created
+      ↓
+Availability check
+      ↓
+Contact confirmed
+      ↓
+BookingBlock created
+      ↓
+BookingSlots scheduled
+------------------------
+POST http://localhost:5000/booking-requests
+
+{
+  "city": "Toronto",
+  "postalCode": "M5H2N2",
+  "coordinates": [-79.3832, 43.6532],
+  "daysPerWeek": 3,
+  "timeOfDay": "daytime",
+  "visitDuration": "2-3 hours",
+  "lengthOfCareWeeks": 4
+}
+
+
+instead of writing the body, requesting client to include coordinates, it should get coordinates from the client address,
