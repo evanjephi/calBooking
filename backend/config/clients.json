@@ -1,0 +1,35 @@
+[
+{
+  "_id": "client1",
+  "firstName": "Alice",
+  "lastName": "Brown",
+  "address": {
+    "street": "123 Queen St",
+    "city": "Toronto",
+    "postalCode": "M5H 2N2",
+    "coordinates": [-79.3832, 43.6532]
+  }
+},
+{
+  "_id": "client2",
+  "firstName": "Brian",
+  "lastName": "Chen",
+  "address": {
+    "street": "200 Borough Dr",
+    "city": "Scarborough",
+    "postalCode": "M1P 4P5",
+    "coordinates": [-79.2577, 43.7731]
+  }
+},
+{
+  "_id": "client3",
+  "firstName": "Catherine",
+  "lastName": "Lee",
+  "address": {
+    "street": "5000 Highway 7",
+    "city": "Markham",
+    "postalCode": "L3R 4M9",
+    "coordinates": [-79.3370, 43.8561]
+  }
+}
+]
