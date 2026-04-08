@@ -18,7 +18,7 @@ describe('Server basics', () => {
   });
 
   it('returns 404 JSON for unknown API routes', async () => {
-    const res = await request(app).get('/nonexistent-route');
+    const res = await request(app).get('/auth/nonexistent');
     expect(res.status).toBe(404);
   });
 });

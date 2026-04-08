@@ -70,6 +70,7 @@ export default function BookingLocation() {
         visitDuration: "2-3 hours",
         daysPerWeek: 3,
         lengthOfCareWeeks: 4,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       };
       if (form.startingDate) payload.specificDate = form.startingDate;
       if (form.genderPreference) payload.genderPreference = form.genderPreference;

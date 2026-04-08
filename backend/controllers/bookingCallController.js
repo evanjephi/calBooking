@@ -12,6 +12,35 @@ const { generateSlotTimes } = require("../services/slotTimeGenerator");
 const RETELL_API_BASE = "https://api.retellai.com";
 const RETELL_API_KEY = process.env.RETELL_API_KEY;
 
+// ── Canadian postal-code prefix → IANA timezone mapping ──
+// First letter of postal code determines the province/territory
+const POSTAL_PREFIX_TO_TIMEZONE = {
+  A: "America/St_Johns",      // Newfoundland
+  B: "America/Halifax",       // Nova Scotia
+  C: "America/Halifax",       // Prince Edward Island
+  E: "America/Moncton",       // New Brunswick
+  G: "America/Toronto",       // Eastern Quebec
+  H: "America/Toronto",       // Montreal area
+  J: "America/Toronto",       // Western Quebec
+  K: "America/Toronto",       // Eastern Ontario
+  L: "America/Toronto",       // Central Ontario
+  M: "America/Toronto",       // Toronto
+  N: "America/Toronto",       // Southwestern Ontario
+  P: "America/Toronto",       // Northern Ontario
+  R: "America/Winnipeg",      // Manitoba
+  S: "America/Regina",        // Saskatchewan
+  T: "America/Edmonton",      // Alberta
+  V: "America/Vancouver",     // British Columbia
+  X: "America/Yellowknife",   // NWT / Nunavut
+  Y: "America/Whitehorse",    // Yukon
+};
+
+function timezoneFromPostalCode(postalCode) {
+  if (!postalCode) return "America/Toronto";
+  const prefix = postalCode.trim().charAt(0).toUpperCase();
+  return POSTAL_PREFIX_TO_TIMEZONE[prefix] || "America/Toronto";
+}
+
 // Helper function to make Retell API calls
 async function retellAPI(endpoint, method = "GET", data = null) {
   try {
@@ -242,7 +271,8 @@ exports.handleBookingCallWebhook = async (req, res) => {
         email: bookingData.email,
         phone: bookingData.phone
       },
-      source: "phone"
+      source: "phone",
+      timezone: timezoneFromPostalCode(bookingData.postalCode)
     });
 
     // If client selected a PSW during the call, attach it

@@ -60,10 +60,10 @@ const TOOL_DEFINITIONS = [
           },
           preferredStartHour: {
             type: "number",
-            description: "Preferred start hour in 24h format (0-23). Optional.",
+            description: "Start hour in 24h format (0-23). ALWAYS include this when the user mentions a specific time (e.g. user says '10 AM' → 10, '2 PM' → 14). If not specified by the user, ask them what time they'd like the visit to start.",
           },
         },
-        required: ["serviceLevel", "bookingType", "city", "postalCode", "timeOfDay", "visitDuration"],
+        required: ["serviceLevel", "bookingType", "city", "postalCode", "timeOfDay", "visitDuration", "preferredStartHour"],
       },
     },
   },
@@ -142,10 +142,10 @@ const TOOL_DEFINITIONS = [
 
 // ── Tool executors ──
 
-async function executeToolCall(toolName, args, userId) {
+async function executeToolCall(toolName, args, userId, timezone) {
   switch (toolName) {
     case "create_booking_request":
-      return await execCreateBookingRequest(args, userId);
+      return await execCreateBookingRequest(args, userId, timezone);
     case "check_availability":
       return await execCheckAvailability(args, userId);
     case "select_psw_and_finalize":
@@ -159,7 +159,7 @@ async function executeToolCall(toolName, args, userId) {
   }
 }
 
-async function execCreateBookingRequest(args, userId) {
+async function execCreateBookingRequest(args, userId, timezone) {
   const geocoded = args.postalCode ? geocodePostalCode(args.postalCode) : null;
   let coords = geocoded || null;
   if (!coords) {
@@ -193,6 +193,7 @@ async function execCreateBookingRequest(args, userId) {
     preferredDays: args.preferredDays || [],
     preferredStartHour: args.preferredStartHour != null ? args.preferredStartHour : null,
     specificDate: args.specificDate || null,
+    timezone: timezone || "America/Toronto",
   });
 
   await request.save();
@@ -209,6 +210,8 @@ async function execCreateBookingRequest(args, userId) {
       timeOfDay: args.timeOfDay,
       visitDuration: args.visitDuration,
       lengthOfCareWeeks: args.lengthOfCareWeeks,
+      preferredStartHour: request.preferredStartHour,
+      specificDate: args.specificDate || null,
     },
   };
 }

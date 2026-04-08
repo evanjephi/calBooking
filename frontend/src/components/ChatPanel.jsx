@@ -67,7 +67,7 @@ export default function ChatPanel({ onClose }) {
     setLoading(true);
 
     try {
-      const data = await sendChatMessage({ message: messageText, sessionId });
+      const data = await sendChatMessage({ message: messageText, sessionId, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone });
       setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
       if (data.sessionId) {
         setSessionId(data.sessionId);

@@ -26,7 +26,8 @@ exports.createBookingRequest = async (req, res) => {
             preferredDays,
             preferredStartHour,
             specificDate,
-            serviceLevel
+            serviceLevel,
+            timezone
         } = req.body;
 
         // Geocode from postal code, fall back to user profile coords, then Toronto centre
@@ -61,7 +62,8 @@ exports.createBookingRequest = async (req, res) => {
             lengthOfCareWeeks,
             preferredDays: preferredDays || [],
             preferredStartHour: preferredStartHour != null ? preferredStartHour : null,
-            specificDate: specificDate || null
+            specificDate: specificDate || null,
+            timezone: timezone || "America/Toronto"
         });
 
         await request.save();

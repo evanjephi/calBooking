@@ -41,8 +41,8 @@ BOOKING WORKFLOW — follow these steps in order:
 2. Find out their service level (or help them choose based on their needs).
 3. Ask for booking type (recurring or one-time).
 4. Collect location: city and postal code (street address is optional but helpful).
-5. Collect schedule: time of day, visit duration. For recurring: days per week, preferred days, how many weeks. For one-time: specific date.
-6. Create the booking request using the create_booking_request tool.
+5. Collect schedule: time of day, visit duration, and SPECIFIC START TIME (e.g. "What time would you like the visit to start?"). For recurring: days per week, preferred days, how many weeks. For one-time: specific date.
+6. Create the booking request using the create_booking_request tool. ALWAYS include preferredStartHour — convert the user's time to 24h format (e.g. 10 AM → 10, 2 PM → 14).
 7. Check availability using check_availability.
 8. Present the available PSWs to the user (name, distance, rating, experience).
 9. Ask the user which PSW they prefer (or recommend the top match).
@@ -51,6 +51,8 @@ BOOKING WORKFLOW — follow these steps in order:
 
 RULES:
 - Always collect ALL required information before calling create_booking_request.
+- ALWAYS ask the user what time they want the visit to start and pass it as preferredStartHour. Never omit this.
+- When confirming booking details, use ONLY the actual data returned by the tools — never echo back what the user said if it differs from the tool response.
 - Never skip the confirmation step — always summarize the details and ask "Does this look right?" before creating the request.
 - If no PSWs are available, apologize and suggest adjusting the schedule or location.
 - You can also help users view their bookings (get_my_bookings) or cancel bookings (cancel_booking).
@@ -83,7 +85,7 @@ function checkRateLimit(session) {
 
 exports.sendMessage = async (req, res) => {
   try {
-    const { message, sessionId } = req.body;
+    const { message, sessionId, timezone } = req.body;
     if (!message || typeof message !== "string" || message.trim().length === 0) {
       return res.status(400).json({ message: "Message is required." });
     }
@@ -172,7 +174,7 @@ exports.sendMessage = async (req, res) => {
           fnArgs = {};
         }
 
-        const toolResult = await executeToolCall(fnName, fnArgs, userId);
+        const toolResult = await executeToolCall(fnName, fnArgs, userId, timezone);
 
         // Update session step based on tool
         if (fnName === "create_booking_request" && toolResult.success) {

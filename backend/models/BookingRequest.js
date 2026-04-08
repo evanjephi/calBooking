@@ -143,6 +143,11 @@ const bookingRequestSchema = new mongoose.Schema(
     type: String,
     enum: ["api", "phone"],
     default: "api"
+  },
+
+  timezone: {
+    type: String,
+    default: "America/Toronto"
   }
 
 },

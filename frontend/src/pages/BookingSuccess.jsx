@@ -53,7 +53,7 @@ export default function BookingSuccess() {
       </p>
 
       <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-        <button className="btn btn-primary" onClick={() => navigate("/my-bookings")}>
+        <button className="btn btn-primary" onClick={() => navigate("/bookings")}>
           View My Bookings
         </button>
         <button className="btn btn-secondary" onClick={() => navigate("/find-psw")}>

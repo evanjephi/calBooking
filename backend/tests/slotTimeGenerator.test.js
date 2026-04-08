@@ -1,7 +1,9 @@
 import { describe, it, expect } from 'vitest';
 
-const { generateSlotTimes, TIME_RANGES, DURATION_HOURS, DAY_TO_JS, getWeekStart } =
+const { generateSlotTimes, localToUTC, DEFAULT_TIMEZONE, TIME_RANGES, DURATION_HOURS, DAY_TO_JS, getWeekStart } =
   await import('../services/slotTimeGenerator.js');
+
+const { DateTime } = await import('luxon');
 
 describe('TIME_RANGES constants', () => {
   it('defines all four time ranges', () => {
@@ -64,36 +66,89 @@ describe('getWeekStart', () => {
   });
 });
 
+describe('localToUTC', () => {
+  it('converts Toronto 10 AM to correct UTC', () => {
+    // April 9 2026 — Toronto is EDT (UTC-4)
+    const result = localToUTC(2026, 4, 9, 10, 'America/Toronto');
+    expect(result.toISOString()).toBe('2026-04-09T14:00:00.000Z');
+  });
+
+  it('converts Edmonton 10 AM to correct UTC', () => {
+    // April 9 2026 — Edmonton is MDT (UTC-6)
+    const result = localToUTC(2026, 4, 9, 10, 'America/Edmonton');
+    expect(result.toISOString()).toBe('2026-04-09T16:00:00.000Z');
+  });
+
+  it('converts Vancouver 10 AM to correct UTC', () => {
+    // April 9 2026 — Vancouver is PDT (UTC-7)
+    const result = localToUTC(2026, 4, 9, 10, 'America/Vancouver');
+    expect(result.toISOString()).toBe('2026-04-09T17:00:00.000Z');
+  });
+
+  it('handles winter time (EST) correctly', () => {
+    // January 15 2026 — Toronto is EST (UTC-5)
+    const result = localToUTC(2026, 1, 15, 10, 'America/Toronto');
+    expect(result.toISOString()).toBe('2026-01-15T15:00:00.000Z');
+  });
+});
+
+describe('DEFAULT_TIMEZONE', () => {
+  it('defaults to America/Toronto', () => {
+    expect(DEFAULT_TIMEZONE).toBe('America/Toronto');
+  });
+});
+
 describe('generateSlotTimes - one-time booking', () => {
-  it('generates a single slot for a specific date', () => {
+  it('generates a single slot for a specific date in the correct timezone', () => {
     const req = {
       bookingType: 'one-time',
-      specificDate: new Date(2026, 5, 15), // June 15, 2026
+      specificDate: new Date(Date.UTC(2026, 5, 15)), // June 15, 2026
       timeOfDay: 'daytime',
       visitDuration: '2-3 hours',
-      preferredStartHour: 10
+      preferredStartHour: 10,
+      timezone: 'America/Toronto'
     };
 
     const slots = generateSlotTimes(req);
     expect(slots).toHaveLength(1);
-    expect(slots[0].start.getHours()).toBe(10);
-    // 2.5 hours later = 12:30
-    expect(slots[0].end.getHours()).toBe(12);
-    expect(slots[0].end.getMinutes()).toBe(30);
+
+    // June 15 2026 Toronto is EDT (UTC-4), so 10 AM local = 14:00 UTC
+    expect(slots[0].start.toISOString()).toBe('2026-06-15T14:00:00.000Z');
+    // 2.5 hours later = 16:30 UTC
+    expect(slots[0].end.toISOString()).toBe('2026-06-15T16:30:00.000Z');
+  });
+
+  it('generates correct UTC for Edmonton timezone', () => {
+    const req = {
+      bookingType: 'one-time',
+      specificDate: new Date(Date.UTC(2026, 5, 15)),
+      timeOfDay: 'daytime',
+      visitDuration: '1 hour',
+      preferredStartHour: 10,
+      timezone: 'America/Edmonton'
+    };
+
+    const slots = generateSlotTimes(req);
+    expect(slots).toHaveLength(1);
+    // June 15 2026 Edmonton is MDT (UTC-6), so 10 AM local = 16:00 UTC
+    expect(slots[0].start.toISOString()).toBe('2026-06-15T16:00:00.000Z');
+    expect(slots[0].end.toISOString()).toBe('2026-06-15T17:00:00.000Z');
   });
 
   it('uses timeRange start when no preferredStartHour', () => {
     const req = {
       bookingType: 'one-time',
-      specificDate: new Date(2026, 5, 15),
+      specificDate: new Date(Date.UTC(2026, 5, 15)),
       timeOfDay: 'evening',
       visitDuration: '1 hour',
-      preferredStartHour: null
+      preferredStartHour: null,
+      timezone: 'America/Toronto'
     };
 
     const slots = generateSlotTimes(req);
     expect(slots).toHaveLength(1);
-    expect(slots[0].start.getHours()).toBe(16); // evening starts at 16
+    // Evening starts at 16, Toronto EDT = UTC-4, so 16:00 local = 20:00 UTC
+    expect(slots[0].start.toISOString()).toBe('2026-06-15T20:00:00.000Z');
   });
 
   it('generates tomorrow when no specificDate', () => {
@@ -101,24 +156,41 @@ describe('generateSlotTimes - one-time booking', () => {
       bookingType: 'one-time',
       specificDate: null,
       timeOfDay: 'daytime',
-      visitDuration: '1 hour'
+      visitDuration: '1 hour',
+      timezone: 'America/Toronto'
     };
 
     const slots = generateSlotTimes(req);
     expect(slots).toHaveLength(1);
 
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    expect(slots[0].start.getDate()).toBe(tomorrow.getDate());
+    const tomorrowLocal = DateTime.now().setZone('America/Toronto').startOf('day').plus({ days: 1 });
+    const slotDt = DateTime.fromJSDate(slots[0].start).setZone('America/Toronto');
+    expect(slotDt.day).toBe(tomorrowLocal.day);
+  });
+
+  it('defaults to America/Toronto when no timezone', () => {
+    const req = {
+      bookingType: 'one-time',
+      specificDate: new Date(Date.UTC(2026, 5, 15)),
+      timeOfDay: 'daytime',
+      visitDuration: '1 hour',
+      preferredStartHour: 10
+      // no timezone field
+    };
+
+    const slots = generateSlotTimes(req);
+    // Should use Toronto EDT (UTC-4): 10 AM = 14:00 UTC
+    expect(slots[0].start.toISOString()).toBe('2026-06-15T14:00:00.000Z');
   });
 
   it('respects duration "4-6 hours"', () => {
     const req = {
       bookingType: 'one-time',
-      specificDate: new Date(2026, 5, 15),
+      specificDate: new Date(Date.UTC(2026, 5, 15)),
       timeOfDay: 'daytime',
       visitDuration: '4-6 hours',
-      preferredStartHour: 9
+      preferredStartHour: 9,
+      timezone: 'America/Toronto'
     };
 
     const slots = generateSlotTimes(req);
@@ -129,10 +201,11 @@ describe('generateSlotTimes - one-time booking', () => {
   it('respects duration "more than 6 hours"', () => {
     const req = {
       bookingType: 'one-time',
-      specificDate: new Date(2026, 5, 15),
+      specificDate: new Date(Date.UTC(2026, 5, 15)),
       timeOfDay: 'daytime',
       visitDuration: 'more than 6 hours',
-      preferredStartHour: 8
+      preferredStartHour: 8,
+      timezone: 'America/Toronto'
     };
 
     const slots = generateSlotTimes(req);
@@ -150,15 +223,17 @@ describe('generateSlotTimes - recurring booking', () => {
       timeOfDay: 'daytime',
       visitDuration: '2-3 hours',
       preferredDays: ['Monday', 'Wednesday', 'Friday'],
-      preferredStartHour: 9
+      preferredStartHour: 9,
+      timezone: 'America/Toronto'
     };
 
     const slots = generateSlotTimes(req);
     expect(slots).toHaveLength(6); // 3 × 2
 
-    // All should be Mon/Wed/Fri
+    // Verify all slots are Mon/Wed/Fri in Toronto timezone
     for (const slot of slots) {
-      expect([1, 3, 5]).toContain(slot.start.getDay());
+      const local = DateTime.fromJSDate(slot.start).setZone('America/Toronto');
+      expect([1, 3, 5]).toContain(local.weekday); // Luxon: 1=Mon, 3=Wed, 5=Fri
     }
   });
 
@@ -170,16 +245,18 @@ describe('generateSlotTimes - recurring booking', () => {
       timeOfDay: 'daytime',
       visitDuration: '1 hour',
       preferredDays: ['Tuesday'],
-      preferredStartHour: 14
+      preferredStartHour: 14,
+      timezone: 'America/Toronto'
     };
 
     const slots = generateSlotTimes(req);
     expect(slots).toHaveLength(4);
 
-    // All should be Tuesday
+    // All should be Tuesday at 14:00 in Toronto
     for (const slot of slots) {
-      expect(slot.start.getDay()).toBe(2);
-      expect(slot.start.getHours()).toBe(14);
+      const local = DateTime.fromJSDate(slot.start).setZone('America/Toronto');
+      expect(local.weekday).toBe(2); // Tuesday
+      expect(local.hour).toBe(14);
     }
   });
 
@@ -190,14 +267,16 @@ describe('generateSlotTimes - recurring booking', () => {
       lengthOfCareWeeks: 1,
       timeOfDay: 'daytime',
       visitDuration: '1 hour',
-      preferredDays: []
+      preferredDays: [],
+      timezone: 'America/Toronto'
     };
 
     const slots = generateSlotTimes(req);
     // Should pick weekdays (Mon-Fri)
     for (const slot of slots) {
-      expect(slot.start.getDay()).toBeGreaterThanOrEqual(1);
-      expect(slot.start.getDay()).toBeLessThanOrEqual(5);
+      const local = DateTime.fromJSDate(slot.start).setZone('America/Toronto');
+      expect(local.weekday).toBeGreaterThanOrEqual(1);
+      expect(local.weekday).toBeLessThanOrEqual(5);
     }
   });
 
@@ -208,14 +287,16 @@ describe('generateSlotTimes - recurring booking', () => {
       lengthOfCareWeeks: 1,
       timeOfDay: 'weekend',
       visitDuration: '2-3 hours',
-      preferredDays: []
+      preferredDays: [],
+      timezone: 'America/Toronto'
     };
 
     const slots = generateSlotTimes(req);
     expect(slots).toHaveLength(2);
 
     for (const slot of slots) {
-      expect([0, 6]).toContain(slot.start.getDay()); // Sunday or Saturday
+      const local = DateTime.fromJSDate(slot.start).setZone('America/Toronto');
+      expect([6, 7]).toContain(local.weekday); // Luxon: 6=Saturday, 7=Sunday
     }
   });
 
@@ -226,7 +307,8 @@ describe('generateSlotTimes - recurring booking', () => {
       lengthOfCareWeeks: 2,
       timeOfDay: 'daytime',
       visitDuration: '1 hour',
-      preferredDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+      preferredDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      timezone: 'America/Toronto'
     };
 
     const slots = generateSlotTimes(req);
@@ -242,7 +324,8 @@ describe('generateSlotTimes - recurring booking', () => {
       timeOfDay: 'daytime',
       visitDuration: '2-3 hours',
       preferredDays: ['Monday', 'Wednesday'],
-      preferredStartHour: 10
+      preferredStartHour: 10,
+      timezone: 'America/Toronto'
     };
 
     const slots = generateSlotTimes(req);
@@ -259,7 +342,8 @@ describe('generateSlotTimes - recurring booking', () => {
       lengthOfCareWeeks: 1,
       timeOfDay: 'daytime',
       visitDuration: '1 hour',
-      preferredDays: ['Monday', 'Wednesday', 'Friday']
+      preferredDays: ['Monday', 'Wednesday', 'Friday'],
+      timezone: 'America/Toronto'
     };
 
     const now = new Date();
@@ -267,5 +351,30 @@ describe('generateSlotTimes - recurring booking', () => {
     for (const slot of slots) {
       expect(slot.start.getTime()).toBeGreaterThan(now.getTime());
     }
+  });
+
+  it('generates correct UTC for different timezones', () => {
+    const baseReq = {
+      bookingType: 'recurring',
+      daysPerWeek: 1,
+      lengthOfCareWeeks: 1,
+      timeOfDay: 'daytime',
+      visitDuration: '1 hour',
+      preferredDays: ['Monday'],
+      preferredStartHour: 10,
+    };
+
+    const torontoSlots = generateSlotTimes({ ...baseReq, timezone: 'America/Toronto' });
+    const edmontonSlots = generateSlotTimes({ ...baseReq, timezone: 'America/Edmonton' });
+
+    // Both should produce 10 AM in their local timezone
+    const torontoLocal = DateTime.fromJSDate(torontoSlots[0].start).setZone('America/Toronto');
+    const edmontonLocal = DateTime.fromJSDate(edmontonSlots[0].start).setZone('America/Edmonton');
+
+    expect(torontoLocal.hour).toBe(10);
+    expect(edmontonLocal.hour).toBe(10);
+
+    // But the UTC times should differ (Edmonton is 2 hours behind Toronto in summer)
+    expect(edmontonSlots[0].start.getTime()).toBeGreaterThan(torontoSlots[0].start.getTime());
   });
 });
