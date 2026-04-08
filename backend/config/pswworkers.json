@@ -1,0 +1,68 @@
+[
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "homeAddress": { "street": "100 Front St", "city": "Toronto", "postalCode": "M5J 2N1" },
+  "serviceType": ["Bathing","Medication Support"],
+  "availability": [{"day":"Monday","startTime":"09:00","endTime":"17:00"}],
+  "location": { "type": "Point", "coordinates": [-79.3800, 43.6520] }
+},
+{
+  "firstName": "Emily",
+  "lastName": "Smith",
+  "homeAddress": { "street": "250 King St W", "city": "Toronto", "postalCode": "M5V 1H8" },
+  "serviceType": ["Meal Preparation","Companionship"],
+  "availability": [{"day":"Tuesday","startTime":"10:00","endTime":"18:00"}],
+  "location": { "type": "Point", "coordinates": [-79.3870, 43.6485] }
+},
+{
+  "firstName": "Michael",
+  "lastName": "Johnson",
+  "homeAddress": { "street": "400 University Ave", "city": "Toronto", "postalCode": "M5G 1S5" },
+  "serviceType": ["Mobility Assistance","Bathing"],
+  "availability": [{"day":"Wednesday","startTime":"08:00","endTime":"16:00"}],
+  "location": { "type": "Point", "coordinates": [-79.3895, 43.6575] }
+},
+
+{
+  "firstName": "Sarah",
+  "lastName": "Wilson",
+  "homeAddress": { "street": "300 Progress Ave", "city": "Scarborough", "postalCode": "M1P 2Z5" },
+  "serviceType": ["Medication Support","Companionship"],
+  "availability": [{"day":"Thursday","startTime":"09:00","endTime":"17:00"}],
+  "location": { "type": "Point", "coordinates": [-79.2605, 43.7740] }
+},
+{
+  "firstName": "David",
+  "lastName": "Taylor",
+  "homeAddress": { "street": "150 McCowan Rd", "city": "Scarborough", "postalCode": "M1S 5C8" },
+  "serviceType": ["Meal Preparation","Bathing"],
+  "availability": [{"day":"Friday","startTime":"11:00","endTime":"19:00"}],
+  "location": { "type": "Point", "coordinates": [-79.2690, 43.7760] }
+},
+{
+  "firstName": "Linda",
+  "lastName": "Martinez",
+  "homeAddress": { "street": "220 Markham Rd", "city": "Scarborough", "postalCode": "M1J 3C5" },
+  "serviceType": ["Mobility Assistance","Companionship"],
+  "availability": [{"day":"Saturday","startTime":"08:00","endTime":"16:00"}],
+  "location": { "type": "Point", "coordinates": [-79.2505, 43.7695] }
+},
+
+{
+  "firstName": "Kevin",
+  "lastName": "Wong",
+  "homeAddress": { "street": "8200 Warden Ave", "city": "Markham", "postalCode": "L6G 1C7" },
+  "serviceType": ["Medication Support","Meal Preparation"],
+  "availability": [{"day":"Monday","startTime":"09:00","endTime":"17:00"}],
+  "location": { "type": "Point", "coordinates": [-79.3325, 43.8570] }
+},
+{
+  "firstName": "Angela",
+  "lastName": "Patel",
+  "homeAddress": { "street": "5000 Highway 7", "city": "Markham", "postalCode": "L3R 4M9" },
+  "serviceType": ["Bathing","Mobility Assistance"],
+  "availability": [{"day":"Sunday","startTime":"10:00","endTime":"18:00"}],
+  "location": { "type": "Point", "coordinates": [-79.3400, 43.8580] }
+}
+]
