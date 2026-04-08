@@ -1,4 +1,5 @@
-import { NavLink, Outlet, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { NavLink, Outlet, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const navItems = [
@@ -13,10 +14,36 @@ const navItems = [
 
 export default function AdminLayout() {
   const { user, logout } = useAuth();
+  const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Close sidebar on route change
+  useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
+
+  // Prevent body scroll when sidebar is open
+  useEffect(() => {
+    document.body.style.overflow = sidebarOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [sidebarOpen]);
 
   return (
     <div className="admin-layout">
-      <aside className="admin-sidebar">
+      {/* Mobile topbar */}
+      <div className="admin-topbar">
+        <button
+          className={`hamburger${sidebarOpen ? " open" : ""}`}
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          aria-label="Toggle admin menu"
+        >
+          <span /><span /><span />
+        </button>
+        <Link to="/admin" className="admin-topbar-brand">Admin Panel</Link>
+      </div>
+
+      {/* Backdrop for mobile */}
+      {sidebarOpen && <div className="admin-sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}
+
+      <aside className={`admin-sidebar${sidebarOpen ? " admin-sidebar--open" : ""}`}>
         <Link to="/admin" className="admin-sidebar-brand">
           <div className="nav-brand-icon">✦</div>
           <span>Admin Panel</span>

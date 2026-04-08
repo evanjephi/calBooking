@@ -1846,16 +1846,84 @@ legend {
 }
 .footer-right a:hover { color: var(--teal); }
 
+/* ── Admin mobile topbar (hidden on desktop) ── */
+.admin-topbar {
+  display: none;
+}
+.admin-sidebar-backdrop {
+  display: none;
+}
+
 @media (max-width: 768px) {
+  /* Show mobile topbar */
+  .admin-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--navy);
+    padding: 0 16px;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 1040;
+  }
+  .admin-topbar .hamburger { display: flex; }
+  .admin-topbar-brand {
+    color: #fff;
+    font-weight: 800;
+    font-size: 17px;
+    text-decoration: none;
+  }
+
+  /* Stack layout vertically */
   .admin-layout { flex-direction: column; }
-  .admin-sidebar { width: 100%; height: auto; position: static; flex-direction: row; flex-wrap: wrap; }
-  .admin-nav { flex-direction: row; flex-wrap: wrap; padding: 8px; }
-  .admin-nav-item { font-size: 12px; padding: 6px 10px; }
-  .admin-sidebar-footer { display: none; }
-  .admin-main { padding: 20px 16px; }
+
+  /* Sidebar becomes a drawer */
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 260px;
+    max-width: 85vw;
+    height: 100dvh;
+    z-index: 1060;
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+  }
+  .admin-sidebar--open {
+    transform: translateX(0);
+  }
+  .admin-sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.4);
+    z-index: 1050;
+  }
+
+  /* Larger touch targets for nav items */
+  .admin-nav-item { padding: 12px 12px; font-size: 15px; }
+
+  /* Show footer in drawer */
+  .admin-sidebar-footer { display: block; }
+
+  /* Adjust main content */
+  .admin-main { padding: 20px 16px; min-height: auto; }
+
+  /* Responsive content tweaks */
+  .admin-stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .admin-table { font-size: 13px; }
+  .admin-table th,
+  .admin-table td { padding: 10px 12px; }
+  .admin-header { gap: 8px; }
+
   .public-hero h1 { font-size: 28px; }
   .hub-featured-img { height: 240px; }
   .post-hero-image img { height: 260px; }
+}
+
+@media (max-width: 480px) {
+  .admin-stats-grid { grid-template-columns: 1fr; }
 }
 
 /* Application status badges */
