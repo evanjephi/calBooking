@@ -1992,6 +1992,7 @@ legend {
   font-weight: 800;
   line-height: 1.2;
   margin-bottom: 20px;
+  color: #fff
 }
 .landing-hero-content p {
   font-size: 17px;
@@ -2107,7 +2108,7 @@ legend {
 /* Nav action links (Sign up / Log in) */
 .nav-link-action {
   font-size: 14px;
-  color: inherit;
+  color: white;
   text-decoration: none;
   font-weight: 500;
   padding: 6px 12px;
