@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { getAdminPosts, deleteAdminPost, imageUrl } from "../../api/api";
 
@@ -7,12 +7,23 @@ export default function AdminPosts() {
   const [error, setError] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
   const category = searchParams.get("category") || "";
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     getAdminPosts(category || undefined)
       .then(setPosts)
       .catch((e) => setError(e.message));
   }, [category]);
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return posts;
+    const q = search.toLowerCase();
+    return posts.filter(p =>
+      (p.title || "").toLowerCase().includes(q) ||
+      (p.category || "").toLowerCase().includes(q) ||
+      (p.status || "").toLowerCase().includes(q)
+    );
+  }, [posts, search]);
 
   async function handleDelete(id) {
     if (!confirm("Delete this post?")) return;
@@ -31,19 +42,28 @@ export default function AdminPosts() {
         <Link to="/admin/posts/new" className="btn btn-teal">+ New Post</Link>
       </div>
 
-      <div className="admin-filters">
-        <button
-          className={`btn ${!category ? "btn-teal" : "btn-secondary"}`}
-          onClick={() => setSearchParams({})}
-        >All</button>
-        <button
-          className={`btn ${category === "clients" ? "btn-teal" : "btn-secondary"}`}
-          onClick={() => setSearchParams({ category: "clients" })}
-        >Clients</button>
-        <button
-          className={`btn ${category === "providers" ? "btn-teal" : "btn-secondary"}`}
-          onClick={() => setSearchParams({ category: "providers" })}
-        >Providers</button>
+      <div className="admin-toolbar">
+        <div className="admin-filters">
+          <button
+            className={`btn ${!category ? "btn-teal" : "btn-secondary"}`}
+            onClick={() => setSearchParams({})}
+          >All</button>
+          <button
+            className={`btn ${category === "clients" ? "btn-teal" : "btn-secondary"}`}
+            onClick={() => setSearchParams({ category: "clients" })}
+          >Clients</button>
+          <button
+            className={`btn ${category === "providers" ? "btn-teal" : "btn-secondary"}`}
+            onClick={() => setSearchParams({ category: "providers" })}
+          >Providers</button>
+        </div>
+        <input
+          className="admin-search-input"
+          type="text"
+          placeholder="Search by title…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
 
       {error && <div className="error-banner">{error}</div>}
@@ -61,7 +81,7 @@ export default function AdminPosts() {
             </tr>
           </thead>
           <tbody>
-            {posts.map((post) => (
+            {filtered.map((post) => (
               <tr key={post._id}>
                 <td>
                   {post.coverImage ? (
@@ -84,7 +104,7 @@ export default function AdminPosts() {
                 </td>
               </tr>
             ))}
-            {posts.length === 0 && (
+            {filtered.length === 0 && (
               <tr><td colSpan={6} className="center-text">No posts found</td></tr>
             )}
           </tbody>
