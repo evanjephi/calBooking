@@ -51,9 +51,7 @@ p { margin: 0 0 4px; }
 a { color: var(--teal); text-decoration: none; }
 /* a:hover { text-decoration: underline; } */
 
-/* ══════════════════════════════════════════
-   NAVIGATION
-   ══════════════════════════════════════════ */
+
 .nav {
   display: flex;
   align-items: center;
@@ -210,9 +208,8 @@ a { color: var(--teal); text-decoration: none; }
   background: #fef2f2;
 }
 
-/* ══════════════════════════════════════════
-   HERO BANNER
-   ══════════════════════════════════════════ */
+
+   /* HERO BANNER */
 .hero {
   background: linear-gradient(135deg, #1a2332 0%, #2d4a5e 50%, #5f8d7e 100%);
   padding: 60px 24px;
@@ -232,9 +229,7 @@ a { color: var(--teal); text-decoration: none; }
   margin: 0 auto;
 }
 
-/* ══════════════════════════════════════════
-   PAGE + LAYOUT
-   ══════════════════════════════════════════ */
+/* PAGE + LAYOUT */
 .page {
   max-width: 1200px;
   margin: 0 auto;
@@ -271,9 +266,9 @@ a { color: var(--teal); text-decoration: none; }
   .split-layout { grid-template-columns: 1fr; }
 }
 
-/* ══════════════════════════════════════════
+/* 
    CARDS
-   ══════════════════════════════════════════ */
+    */
 .card {
   background: var(--card-bg);
   border: 1px solid var(--border);
@@ -283,9 +278,9 @@ a { color: var(--teal); text-decoration: none; }
 }
 .card + .card { margin-top: 16px; }
 
-/* ══════════════════════════════════════════
+/* 
    SERVICE LEVEL CARDS (Step 1)
-   ══════════════════════════════════════════ */
+    */
 .service-card {
   background: var(--card-bg);
   border: 2px solid var(--border);
@@ -353,9 +348,9 @@ a { color: var(--teal); text-decoration: none; }
   box-shadow: 0 2px 6px rgba(0,0,0,.15);
 }
 
-/* ══════════════════════════════════════════
+/* 
    SELECTED SERVICE BANNER (Step 2)
-   ══════════════════════════════════════════ */
+    */
 .service-banner {
   display: flex;
   align-items: center;
@@ -408,9 +403,9 @@ a { color: var(--teal); text-decoration: none; }
   color: #fff;
 }
 
-/* ══════════════════════════════════════════
+/* 
    FORM (Step 2)
-   ══════════════════════════════════════════ */
+    */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -463,9 +458,9 @@ legend {
   font-size: 15px;
 }
 
-/* ══════════════════════════════════════════
+/* 
    BUTTONS
-   ══════════════════════════════════════════ */
+    */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -528,9 +523,9 @@ legend {
 
 .btn-block { width: 100%; }
 
-/* ══════════════════════════════════════════
+/* 
    ERROR BANNER
-   ══════════════════════════════════════════ */
+    */
 .error-banner {
   color: var(--red);
   background: var(--red-bg);
@@ -541,9 +536,9 @@ legend {
   border: 1px solid rgba(185,28,28,.15);
 }
 
-/* ══════════════════════════════════════════
+/* 
    BADGES
-   ══════════════════════════════════════════ */
+    */
 .badge {
   display: inline-block;
   font-size: 12px;
@@ -555,9 +550,9 @@ legend {
 .badge-yellow { background: var(--yellow-bg); color: var(--yellow); }
 .badge-teal { background: var(--teal-light); color: var(--teal); }
 
-/* ══════════════════════════════════════════
+/* 
    STEP INDICATOR
-   ══════════════════════════════════════════ */
+    */
 .step-indicator {
   display: inline-block;
   font-size: 13px;
@@ -569,9 +564,9 @@ legend {
   margin-bottom: 12px;
 }
 
-/* ══════════════════════════════════════════
+/* 
    PSW RESULTS (Step 3) — side-by-side
-   ══════════════════════════════════════════ */
+    */
 .results-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -658,9 +653,9 @@ legend {
   font-weight: 600;
 }
 
-/* ══════════════════════════════════════════
+/* 
    PSW PROFILE (Step 4)
-   ══════════════════════════════════════════ */
+    */
 .profile-header {
   display: flex;
   gap: 28px;
@@ -708,9 +703,9 @@ legend {
   color: var(--text);
 }
 
-/* ══════════════════════════════════════════
+/* 
    BOOKING CHECKOUT (Step 5)
-   ══════════════════════════════════════════ */
+    */
 .checkout-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -988,9 +983,9 @@ legend {
   color: var(--text-h);
 }
 
-/* ══════════════════════════════════════════
+/* 
    SUMMARY ROWS
-   ══════════════════════════════════════════ */
+    */
 .summary-row {
   display: flex;
   justify-content: space-between;
@@ -1003,9 +998,9 @@ legend {
 .summary-label { color: var(--text); }
 .summary-value { color: var(--text-h); font-weight: 600; text-align: right; }
 
-/* ══════════════════════════════════════════
+/* 
    SUCCESS PAGE
-   ══════════════════════════════════════════ */
+    */
 .success-page { text-align: center; padding: 60px 0; }
 .success-icon {
   width: 72px;
@@ -1021,9 +1016,9 @@ legend {
   box-shadow: 0 4px 12px rgba(5,150,105,.15);
 }
 
-/* ══════════════════════════════════════════
+/* 
    MAP
-   ══════════════════════════════════════════ */
+    */
 .map-container {
   padding: 0 !important;
   overflow: hidden;
@@ -1053,9 +1048,9 @@ legend {
   box-shadow: 0 0 0 1px rgba(0,0,0,.15);
 }
 
-/* ══════════════════════════════════════════
+/* 
    OLD PSW CARD STYLE (fallback / MyBookings)
-   ══════════════════════════════════════════ */
+    */
 .psw-card { display: flex; flex-direction: column; gap: 12px; }
 .psw-card-header { display: flex; gap: 12px; align-items: center; }
 .psw-avatar {
@@ -1067,9 +1062,9 @@ legend {
 .psw-card-active { border-color: var(--teal); box-shadow: 0 0 0 2px var(--teal-light); }
 .psw-card-assigned { border-color: var(--green); }
 
-/* ══════════════════════════════════════════
+/* 
    CALENDAR (reused in Step 5)
-   ══════════════════════════════════════════ */
+    */
 .cal-section { overflow: hidden; }
 .cal-header { margin-bottom: 12px; }
 .cal-header h2 { margin-bottom: 4px; }
@@ -1109,9 +1104,9 @@ legend {
 .cal-slot-time { font-size: 13px; color: var(--text); flex: 1; }
 .cal-slot-status { flex-shrink: 0; }
 
-/* ══════════════════════════════════════════
+/* 
    UTILITIES
-   ══════════════════════════════════════════ */
+    */
 .mt-8 { margin-top: 8px; }
 .mt-12 { margin-top: 12px; }
 .mt-16 { margin-top: 16px; }
@@ -1125,9 +1120,9 @@ legend {
 .flex-row { display: flex; gap: 12px; }
 .flex-row > * { flex: 1; }
 
-/* ══════════════════════════════════════════
+/* 
    FOOTER
-   ══════════════════════════════════════════ */
+    */
 .footer {
   background: var(--navy);
   color: rgba(255,255,255,.6);
@@ -1140,9 +1135,9 @@ legend {
   color: rgba(255,255,255,.8);
 }
 
-/* ══════════════════════════════════════════
+/* 
    HAMBURGER BUTTON
-   ══════════════════════════════════════════ */
+    */
 .hamburger {
   display: none;
   flex-direction: column;
@@ -1168,9 +1163,9 @@ legend {
 .hamburger.open span:nth-child(2) { opacity: 0; }
 .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-/* ══════════════════════════════════════════
+/* 
    MOBILE NAV OVERLAY
-   ══════════════════════════════════════════ */
+    */
 .mobile-nav-backdrop {
   display: none;
 }
@@ -1178,9 +1173,9 @@ legend {
   display: none;
 }
 
-/* ══════════════════════════════════════════
+/* 
    RESPONSIVE MOBILE
-   ══════════════════════════════════════════ */
+    */
 @media (max-width: 768px) {
   .nav-links { display: none; }
   .nav-actions { display: none; }
@@ -1302,9 +1297,9 @@ legend {
   .psw-grid { grid-template-columns: 1fr; }
 }
 
-/* ══════════════════════════════════════════
+/* 
    ADMIN LAYOUT
-   ══════════════════════════════════════════ */
+    */
 .admin-layout {
   display: flex;
   min-height: 100dvh;
@@ -1545,9 +1540,9 @@ legend {
 }
 .btn-admin-link:hover { background: var(--teal-hover); text-decoration: none; }
 
-/* ══════════════════════════════════════════
+/* 
    PUBLIC PAGES (About, Contact, etc.)
-   ══════════════════════════════════════════ */
+    */
 .public-page {
   margin: 0;
 }
@@ -1595,9 +1590,9 @@ legend {
   margin-bottom: 24px;
 }
 
-/* ══════════════════════════════════════════
+/* 
    RESOURCE HUB / PROVIDER HUB
-   ══════════════════════════════════════════ */
+    */
 .hub-content {
   max-width: 1000px;
   margin: 0 auto;
@@ -1784,9 +1779,9 @@ legend {
   border-radius: 0 var(--radius) var(--radius) 0;
 }
 
-/* ══════════════════════════════════════════
+/* 
    SITE FOOTER
-   ══════════════════════════════════════════ */
+    */
 .site-footer {
   background: var(--card-bg);
   border-top: 1px solid var(--border);
@@ -1962,9 +1957,9 @@ legend {
   flex-wrap: wrap;
 }
 
-/* ══════════════════════════════════════════
+/* 
    LANDING PAGE
-   ══════════════════════════════════════════ */
+    */
 .landing-page {
   width: 100%;
 }
@@ -2117,9 +2112,9 @@ legend {
   color: var(--teal);
 }
 
-/* ══════════════════════════════════════════
+/* 
    PSW APPLICATION FORM
-   ══════════════════════════════════════════ */
+    */
 .psw-application-page {
   min-height: 60vh;
   background: linear-gradient(160deg, #0d1f2d 0%, #1a3a2a 40%, #2d5a3d 100%);
@@ -2323,9 +2318,9 @@ legend {
 .status-approved { background: #d4edda; color: #155724; }
 .status-rejected { background: #f8d7da; color: #721c24; }
 
-/* ══════════════════════════════════════════
+/* 
    RESPONSIVE: Landing + PSW Application
-   ══════════════════════════════════════════ */
+    */
 @media (max-width: 768px) {
   .landing-hero-content h1 { font-size: 28px; }
   .landing-hero { padding: 60px 20px 50px; }
@@ -2436,9 +2431,9 @@ legend {
   .psw-booking-actions { flex-direction: column; }
 }
 
-/* ══════════════════════════════════════════
+/* 
    ACCOUNT PAGES
-   ══════════════════════════════════════════ */
+    */
 .account-page {
   max-width: 720px;
   margin: 0 auto;
@@ -2697,9 +2692,9 @@ legend {
   .account-form .form-row { grid-template-columns: 1fr; }
 }
 
-/* ══════════════════════════════════════════
+/* 
    ELDER-FRIENDLY BOOKING UX STYLES
-   ══════════════════════════════════════════ */
+    */
 
 /* Service card icon */
 .service-card-icon {
@@ -3060,9 +3055,9 @@ legend {
   color: var(--text-h);
 }
 
-/* ══════════════════════════════════════════
+/* 
    CHAT ASSISTANT
-   ══════════════════════════════════════════ */
+    */
 
 /* ── Floating Action Button ── */
 .chat-fab {
