@@ -1,13 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getAdminUsers, updateAdminUser, deleteAdminUser } from "../../api/api";
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     getAdminUsers().then(setUsers).catch((e) => setError(e.message));
   }, []);
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return users;
+    const q = search.toLowerCase();
+    return users.filter(u =>
+      `${u.firstName} ${u.lastName}`.toLowerCase().includes(q) ||
+      (u.email || "").toLowerCase().includes(q) ||
+      (u.role || "").toLowerCase().includes(q)
+    );
+  }, [users, search]);
 
   async function handleRoleChange(id, role) {
     try {
@@ -34,6 +45,17 @@ export default function AdminUsers() {
         <h1>Users</h1>
       </div>
 
+      <div className="admin-toolbar">
+        <div></div>
+        <input
+          className="admin-search-input"
+          type="text"
+          placeholder="Search by name, email, or role…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+
       {error && <div className="error-banner">{error}</div>}
 
       <div className="admin-table-wrap">
@@ -49,7 +71,7 @@ export default function AdminUsers() {
             </tr>
           </thead>
           <tbody>
-            {users.map((u) => (
+            {filtered.map((u) => (
               <tr key={u._id}>
                 <td><strong>{u.firstName} {u.lastName}</strong></td>
                 <td>{u.email}</td>
@@ -71,7 +93,7 @@ export default function AdminUsers() {
                 </td>
               </tr>
             ))}
-            {users.length === 0 && (
+            {filtered.length === 0 && (
               <tr><td colSpan={6} className="center-text">No users found</td></tr>
             )}
           </tbody>
