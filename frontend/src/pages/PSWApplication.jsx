@@ -24,7 +24,7 @@ const AVAILABILITY_OPTIONS = [
 ];
 
 const LANGUAGES = [
-  "English", "French", "Mandarin", "Cantonese", "Punjabi",
+  "English", "Tigrinya", "Amharic", "French", "Mandarin", "Cantonese", "Punjabi",
   "Tagalog", "Spanish", "Portuguese", "Arabic", "Hindi",
   "Urdu", "Tamil", "Italian", "Korean", "Vietnamese"
 ];
