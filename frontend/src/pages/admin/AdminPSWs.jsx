@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getAdminPSWs, deleteAdminPSW, updateAdminPSW, createAdminPSW, imageUrl } from "../../api/api";
 
 const STATUS_LABELS = {
@@ -15,14 +15,25 @@ export default function AdminPSWs() {
   const [expanded, setExpanded] = useState(null);
   const [showNew, setShowNew] = useState(false);
   const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     getAdminPSWs().then(setPsws).catch((e) => setError(e.message));
   }, []);
 
-  const filtered = filter === "all"
+  const statusFiltered = filter === "all"
     ? psws
     : psws.filter(p => (p.applicationStatus || "") === filter);
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return statusFiltered;
+    const q = search.toLowerCase();
+    return statusFiltered.filter(p =>
+      `${p.firstName} ${p.lastName}`.toLowerCase().includes(q) ||
+      (p.homeAddress?.city || "").toLowerCase().includes(q) ||
+      (p.serviceLevels || []).some(s => s.toLowerCase().includes(q))
+    );
+  }, [statusFiltered, search]);
 
   const pendingCount = psws.filter(p => p.applicationStatus === "pending").length;
 
@@ -72,17 +83,26 @@ export default function AdminPSWs() {
         <button className="btn btn-teal" onClick={() => setShowNew(true)}>+ New PSW</button>
       </div>
 
-      <div className="admin-filters" style={{ marginBottom: 16 }}>
-        {["all", "pending", "approved", "rejected", ""].map(f => (
-          <button
-            key={f}
-            className={`btn ${filter === f ? "btn-teal" : "btn-secondary"}`}
-            style={{ padding: "6px 14px", fontSize: 13 }}
-            onClick={() => setFilter(f)}
-          >
-            {f === "all" ? "All" : f === "" ? "No Application" : f.charAt(0).toUpperCase() + f.slice(1)}
-          </button>
-        ))}
+      <div className="admin-toolbar">
+        <div className="admin-filters">
+          {["all", "pending", "approved", "rejected", ""].map(f => (
+            <button
+              key={f}
+              className={`btn ${filter === f ? "btn-teal" : "btn-secondary"}`}
+              style={{ padding: "6px 14px", fontSize: 13 }}
+              onClick={() => setFilter(f)}
+            >
+              {f === "all" ? "All" : f === "" ? "No Application" : f.charAt(0).toUpperCase() + f.slice(1)}
+            </button>
+          ))}
+        </div>
+        <input
+          className="admin-search-input"
+          type="text"
+          placeholder="Search by name, city, or service level…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
 
       {error && <div className="error-banner">{error}</div>}
@@ -99,6 +119,7 @@ export default function AdminPSWs() {
               <th>City</th>
               <th>Service Levels</th>
               <th>Experience</th>
+              <th>Bookings</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -115,6 +136,7 @@ export default function AdminPSWs() {
                       <td>{psw.homeAddress?.city || "—"}</td>
                       <td>{(psw.serviceLevels || []).map(s => s.replace("_", " ")).join(", ") || "—"}</td>
                       <td>{psw.yearsExperience || 0} yrs</td>
+                      <td>{psw.bookingCount || 0}</td>
                       <td>
                         <span className={`app-badge ${(STATUS_LABELS[psw.applicationStatus || ""] || STATUS_LABELS[""]).cls}`}>
                           {(STATUS_LABELS[psw.applicationStatus || ""] || STATUS_LABELS[""]).text}
