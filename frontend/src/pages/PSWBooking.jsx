@@ -542,7 +542,7 @@ for (let week = 0; week < recurringWeeks; week++) {
           <div className="wizard-sub-section">
             <label>How long should each visit be?</label>
             <div className="duration-picker">
-              {[{ h: 2, label: "2 hours" }, { h: 3, label: "3 hours" }, { h: 4, label: "4 hours" }].map(({ h, label }) => {
+              {[{ h: 1, label: "1 hour" }, { h: 2, label: "2 hours" }, { h: 3, label: "3 hours" }, { h: 4, label: "4 hours" }].map(({ h, label }) => {
                 const isSelected = (endHour - startHour) === h;
                 return (
                   <button key={h} type="button"
