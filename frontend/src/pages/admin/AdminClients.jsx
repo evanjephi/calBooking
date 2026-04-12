@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getAdminClients, deleteAdminClient, updateAdminClient, createAdminClient } from "../../api/api";
 
 export default function AdminClients() {
@@ -6,10 +6,21 @@ export default function AdminClients() {
   const [error, setError] = useState("");
   const [editing, setEditing] = useState(null);
   const [showNew, setShowNew] = useState(false);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     getAdminClients().then(setClients).catch((e) => setError(e.message));
   }, []);
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return clients;
+    const q = search.toLowerCase();
+    return clients.filter(c =>
+      `${c.firstName} ${c.lastName}`.toLowerCase().includes(q) ||
+      (c.address?.city || "").toLowerCase().includes(q) ||
+      (c.address?.postalCode || "").toLowerCase().includes(q)
+    );
+  }, [clients, search]);
 
   async function handleDelete(id) {
     if (!confirm("Delete this client?")) return;
@@ -48,6 +59,17 @@ export default function AdminClients() {
         <button className="btn btn-teal" onClick={() => setShowNew(true)}>+ New Client</button>
       </div>
 
+      <div className="admin-toolbar">
+        <div></div>
+        <input
+          className="admin-search-input"
+          type="text"
+          placeholder="Search by name, city, or postal code…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+
       {error && <div className="error-banner">{error}</div>}
 
       {showNew && (
@@ -68,7 +90,7 @@ export default function AdminClients() {
             </tr>
           </thead>
           <tbody>
-            {clients.map((client) => (
+            {filtered.map((client) => (
               <tr key={client._id}>
                 {editing === client._id ? (
                   <EditClientRow
@@ -89,7 +111,7 @@ export default function AdminClients() {
                 )}
               </tr>
             ))}
-            {clients.length === 0 && (
+            {filtered.length === 0 && (
               <tr><td colSpan={4} className="center-text">No clients found</td></tr>
             )}
           </tbody>
