@@ -49,6 +49,10 @@ router.get("/users", admin.getUsers);
 router.put("/users/:id", admin.updateUser);
 router.delete("/users/:id", admin.deleteUser);
 
+// Booking Requests (pipeline tracking)
+router.get("/booking-requests", admin.getBookingRequests);
+router.delete("/booking-requests/:id", admin.deleteBookingRequest);
+
 // Images
 router.post("/images", uploadMiddleware, uploadImage);
 router.delete("/images/:id", deleteImage);

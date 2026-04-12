@@ -3,20 +3,67 @@ const Page = require("../models/Page");
 const Client = require("../models/Client");
 const PSWWorker = require("../models/PSWWorker");
 const Booking = require("../models/Booking");
+const BookingRequest = require("../models/BookingRequest");
 const User = require("../models/User");
 
-// ── Dashboard Stats ──
+// ── Dashboard Stats (enhanced) ──
 exports.getStats = async (req, res) => {
   try {
-    const [posts, pages, clients, psws, bookings, users] = await Promise.all([
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const [
+      posts, pages, clients, psws, bookings, users,
+      pendingBookings, confirmedBookings, cancelledBookings,
+      bookingsThisWeek, bookingsThisMonth,
+      bookingRequests, pendingRequests,
+      revenueResult, recentBookings
+    ] = await Promise.all([
       Post.countDocuments(),
       Page.countDocuments(),
       Client.countDocuments(),
       PSWWorker.countDocuments(),
       Booking.countDocuments(),
-      User.countDocuments()
+      User.countDocuments(),
+      Booking.countDocuments({ status: "pending" }),
+      Booking.countDocuments({ status: "confirmed" }),
+      Booking.countDocuments({ status: "cancelled" }),
+      Booking.countDocuments({ createdAt: { $gte: startOfWeek } }),
+      Booking.countDocuments({ createdAt: { $gte: startOfMonth } }),
+      BookingRequest.countDocuments(),
+      BookingRequest.countDocuments({ status: "pending" }),
+      Booking.aggregate([
+        { $match: { status: "confirmed", totalAmount: { $gt: 0 } } },
+        { $group: { _id: null, total: { $sum: "$totalAmount" } } }
+      ]),
+      Booking.find()
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .populate("userId", "firstName lastName")
+        .populate("pswWorker", "firstName lastName")
+        .lean()
     ]);
-    res.json({ posts, pages, clients, psws, bookings, users });
+
+    const totalRevenue = revenueResult[0]?.total || 0;
+
+    res.json({
+      posts, pages, clients, psws, bookings, users,
+      pendingBookings, confirmedBookings, cancelledBookings,
+      bookingsThisWeek, bookingsThisMonth,
+      bookingRequests, pendingRequests,
+      totalRevenue,
+      recentBookings: recentBookings.map(b => ({
+        _id: b._id,
+        client: b.userId ? `${b.userId.firstName} ${b.userId.lastName}` : b.client || "Unknown",
+        psw: b.pswWorker ? `${b.pswWorker.firstName} ${b.pswWorker.lastName}` : "Unassigned",
+        status: b.status,
+        date: b.startTime || b.bookingDate,
+        createdAt: b.createdAt
+      }))
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -196,8 +243,13 @@ exports.deleteClient = async (req, res) => {
 // ── PSW Workers CRUD ──
 exports.getPSWs = async (req, res) => {
   try {
-    const psws = await PSWWorker.find().sort({ lastName: 1 });
-    res.json(psws);
+    const psws = await PSWWorker.find().sort({ lastName: 1 }).lean();
+    const counts = await Booking.aggregate([
+      { $group: { _id: "$pswWorker", total: { $sum: 1 } } }
+    ]);
+    const countMap = Object.fromEntries(counts.map(c => [String(c._id), c.total]));
+    const result = psws.map(p => ({ ...p, bookingCount: countMap[String(p._id)] || 0 }));
+    res.json(result);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -250,9 +302,17 @@ exports.getBookings = async (req, res) => {
     if (req.query.status) filter.status = req.query.status;
     const bookings = await Booking.find(filter)
       .populate("userId", "firstName lastName email")
-      .populate("pswWorker", "name")
-      .sort({ createdAt: -1 });
-    res.json(bookings);
+      .populate("pswWorker", "firstName lastName")
+      .sort({ createdAt: -1 })
+      .lean();
+    // Flatten names for frontend convenience
+    const result = bookings.map(b => ({
+      ...b,
+      clientName: b.userId ? `${b.userId.firstName} ${b.userId.lastName}` : b.client || null,
+      clientEmail: b.userId?.email || null,
+      pswName: b.pswWorker ? `${b.pswWorker.firstName} ${b.pswWorker.lastName}` : null
+    }));
+    res.json(result);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -322,6 +382,42 @@ exports.deleteUser = async (req, res) => {
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json({ message: "User deleted" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ── Booking Requests (admin view into the pipeline) ──
+exports.getBookingRequests = async (req, res) => {
+  try {
+    const filter = {};
+    if (req.query.status) filter.status = req.query.status;
+    const requests = await BookingRequest.find(filter)
+      .populate("userId", "firstName lastName email")
+      .populate("matchedPSWs", "firstName lastName")
+      .populate("selectedPSW.pswId", "firstName lastName")
+      .sort({ createdAt: -1 })
+      .lean();
+    const result = requests.map(r => ({
+      ...r,
+      clientName: r.userId ? `${r.userId.firstName} ${r.userId.lastName}` : null,
+      clientEmail: r.userId?.email || null,
+      selectedPSWName: r.selectedPSW?.pswId
+        ? `${r.selectedPSW.pswId.firstName} ${r.selectedPSW.pswId.lastName}`
+        : r.selectedPSW?.name || null,
+      matchedCount: r.matchedPSWs?.length || 0
+    }));
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.deleteBookingRequest = async (req, res) => {
+  try {
+    const request = await BookingRequest.findByIdAndDelete(req.params.id);
+    if (!request) return res.status(404).json({ message: "Booking request not found" });
+    res.json({ message: "Booking request deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
