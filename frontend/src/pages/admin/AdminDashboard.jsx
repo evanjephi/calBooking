@@ -26,6 +26,7 @@ export default function AdminDashboard() {
     <div>
       <h1>Dashboard</h1>
       <p style={{ marginBottom: 24 }}>Welcome to the PremierPSW admin panel.</p>
+
       <div className="admin-stats-grid">
         {cards.map((c) => (
           <Link key={c.label} to={c.to} className="admin-stat-card">
@@ -35,6 +36,87 @@ export default function AdminDashboard() {
           </Link>
         ))}
       </div>
+
+      {/* Booking Overview */}
+      <div className="dashboard-section">
+        <h2>Booking Overview</h2>
+        <div className="dashboard-metrics">
+          <div className="metric-card">
+            <span className="metric-value">{stats.pendingBookings}</span>
+            <span className="metric-label">Pending</span>
+          </div>
+          <div className="metric-card metric-green">
+            <span className="metric-value">{stats.confirmedBookings}</span>
+            <span className="metric-label">Confirmed</span>
+          </div>
+          <div className="metric-card metric-red">
+            <span className="metric-value">{stats.cancelledBookings}</span>
+            <span className="metric-label">Cancelled</span>
+          </div>
+          <div className="metric-card metric-teal">
+            <span className="metric-value">{stats.bookingsThisWeek}</span>
+            <span className="metric-label">This Week</span>
+          </div>
+          <div className="metric-card metric-teal">
+            <span className="metric-value">{stats.bookingsThisMonth}</span>
+            <span className="metric-label">This Month</span>
+          </div>
+          <div className="metric-card metric-green">
+            <span className="metric-value">${(stats.totalRevenue || 0).toFixed(2)}</span>
+            <span className="metric-label">Total Revenue</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Booking Requests Pipeline */}
+      <div className="dashboard-section">
+        <h2>Request Pipeline</h2>
+        <div className="dashboard-metrics">
+          <div className="metric-card">
+            <span className="metric-value">{stats.bookingRequests}</span>
+            <span className="metric-label">Total Requests</span>
+          </div>
+          <div className="metric-card metric-yellow">
+            <span className="metric-value">{stats.pendingRequests}</span>
+            <span className="metric-label">Pending Requests</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Activity */}
+      {stats.recentBookings?.length > 0 && (
+        <div className="dashboard-section">
+          <h2>Recent Bookings</h2>
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th>PSW</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats.recentBookings.map((b) => (
+                  <tr key={b._id}>
+                    <td><strong>{b.client}</strong></td>
+                    <td>{b.psw}</td>
+                    <td>{b.date ? new Date(b.date).toLocaleDateString() : "—"}</td>
+                    <td>
+                      <span className={`badge ${b.status === "confirmed" ? "badge-green" : b.status === "cancelled" ? "badge-red" : "badge-yellow"}`}>
+                        {b.status}
+                      </span>
+                    </td>
+                    <td>{new Date(b.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
