@@ -44,7 +44,7 @@ export default function AdminPages() {
             {pages.map((page) => (
               <tr key={page._id}>
                 <td><strong>{page.title}</strong></td>
-                <td><code>/{page.slug}</code></td>
+                <td><a href={`/pages/${page.slug}`} target="_blank" rel="noopener noreferrer">/pages/{page.slug}</a></td>
                 <td>{page.template}</td>
                 <td>
                   <span className={`badge ${page.status === "published" ? "badge-green" : "badge-yellow"}`}>
