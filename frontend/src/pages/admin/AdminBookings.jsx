@@ -67,9 +67,9 @@ export default function AdminBookings() {
             {bookings.map((b) => (
               <tr key={b._id}>
                 <td><code>{b._id.slice(-6)}</code></td>
-                <td>{b.clientName || b.clientId || "—"}</td>
-                <td>{b.pswName || b.pswId || "—"}</td>
-                <td>{b.date ? new Date(b.date).toLocaleDateString() : "—"}</td>
+                <td>{b.userId ? `${b.userId.firstName} ${b.userId.lastName}` : b.client || "—"}</td>
+                <td>{b.pswWorker?.name || "—"}</td>
+                <td>{b.startTime ? new Date(b.startTime).toLocaleDateString() : b.bookingDate ? new Date(b.bookingDate).toLocaleDateString() : "—"}</td>
                 <td>
                   <select
                     className="form-input"
