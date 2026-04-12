@@ -248,7 +248,10 @@ exports.getBookings = async (req, res) => {
   try {
     const filter = {};
     if (req.query.status) filter.status = req.query.status;
-    const bookings = await Booking.find(filter).sort({ createdAt: -1 });
+    const bookings = await Booking.find(filter)
+      .populate("userId", "firstName lastName email")
+      .populate("pswWorker", "name")
+      .sort({ createdAt: -1 });
     res.json(bookings);
   } catch (err) {
     res.status(500).json({ message: err.message });
