@@ -120,6 +120,10 @@ export const getAdminBooking = (id) => request("GET", `/admin/bookings/${id}`);
 export const updateAdminBooking = (id, body) => request("PUT", `/admin/bookings/${id}`, body);
 export const deleteAdminBooking = (id) => request("DELETE", `/admin/bookings/${id}`);
 
+// ── Admin: Booking Requests ──
+export const getAdminBookingRequests = (status) => request("GET", `/admin/booking-requests${status ? `?status=${status}` : ""}`);
+export const deleteAdminBookingRequest = (id) => request("DELETE", `/admin/booking-requests/${id}`);
+
 // ── Admin: Users ──
 export const getAdminUsers = () => request("GET", "/admin/users");
 export const updateAdminUser = (id, body) => request("PUT", `/admin/users/${id}`, body);

@@ -3355,3 +3355,151 @@ legend {
   }
   .chat-fab-label { display: none; }
 }
+
+/* ── Admin Parent Tabs ── */
+.admin-parent-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 20px;
+}
+.admin-parent-tab {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  transition: color .2s, border-color .2s;
+  margin-bottom: -2px;
+}
+.admin-parent-tab:hover {
+  color: var(--text-h);
+}
+.admin-parent-tab.active {
+  color: var(--teal);
+  border-bottom-color: var(--teal);
+}
+
+/* ── Admin Toolbar ── */
+.admin-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.admin-search-input {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  color: var(--text);
+  font-size: 13px;
+  min-width: 220px;
+}
+.admin-search-input::placeholder {
+  color: var(--muted);
+}
+.admin-search-input:focus {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 2px rgba(95,158,130,0.15);
+}
+
+/* ── Expandable Detail Row ── */
+.row-expanded {
+  background: var(--bg);
+}
+.detail-row td {
+  padding: 0 !important;
+  border-top: none !important;
+}
+.psw-sub-row td {
+  padding: 8px 14px !important;
+  background: var(--bg);
+  font-size: 13px;
+}
+.booking-detail-panel {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin: 8px 12px 12px;
+}
+.booking-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 24px;
+  font-size: 13px;
+}
+
+/* ── Dashboard Metrics ── */
+.dashboard-section {
+  margin-top: 32px;
+}
+.dashboard-section h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--text-h);
+}
+.dashboard-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.metric-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+}
+.metric-value {
+  display: block;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-h);
+  margin-bottom: 4px;
+}
+.metric-label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.metric-green .metric-value { color: #28a745; }
+.metric-red .metric-value { color: #dc3545; }
+.metric-teal .metric-value { color: var(--teal); }
+.metric-yellow .metric-value { color: #e0a800; }
+
+/* ── Slot Assignments ── */
+.slot-assignments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 13px;
+}
+.slot-assignment-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Badge Additions ── */
+.badge-red { background: #f8d7da; color: #721c24; }
+.badge-teal { background: rgba(95,158,130,0.15); color: var(--teal); }
+
+@media (max-width: 768px) {
+  .admin-toolbar { flex-direction: column; align-items: stretch; }
+  .admin-search-input { min-width: 100%; }
+  .booking-detail-grid { grid-template-columns: 1fr; }
+  .dashboard-metrics { grid-template-columns: repeat(2, 1fr); }
+}
