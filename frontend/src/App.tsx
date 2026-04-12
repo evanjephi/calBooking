@@ -19,6 +19,7 @@ import ContactUs from './pages/ContactUs'
 import ResourceHub from './pages/ResourceHub'
 import ProviderHub from './pages/ProviderHub'
 import PostDetail from './pages/PostDetail'
+import PublicPage from './pages/PublicPage'
 import AdminRoute from './components/AdminRoute'
 import AdminLayout from './components/AdminLayout'
 import AccountSettings from './pages/AccountSettings'
@@ -75,6 +76,7 @@ function App() {
         <Route path="/resources/clients" element={<ResourceHub />} />
         <Route path="/resources/providers" element={<ProviderHub />} />
         <Route path="/resources/:slug" element={<PostDetail />} />
+        <Route path="/pages/:slug" element={<div className="page-content"><PublicPage /></div>} />
 
         {/* PSW Dashboard & Application flow */}
         <Route path="/dashboard" element={<PrivateRoute><div className="page-content"><PSWDashboard /></div></PrivateRoute>} />
