@@ -1,7 +1,7 @@
 // frontend/src/pages/ReviewConfirm.jsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getBookingRequest, confirmRequest, finalizeBooking } from "../api/api";
+import { getBookingRequest, confirmRequest, finalizeBooking, getServiceLevels } from "../api/api";
 
 export default function ReviewConfirm() {
   const { id } = useParams();
@@ -10,9 +10,20 @@ export default function ReviewConfirm() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [serviceLevelLabels, setServiceLevelLabels] = useState({});
 
   useEffect(() => {
-    getBookingRequest(id)
+    Promise.all([
+      getBookingRequest(id),
+      getServiceLevels()
+    ]).then(([reqData, levelsData]) => {
+      setRequest(reqData);
+      const labels = {};
+      for (const l of levelsData) {
+        labels[l.key] = `${l.label} — CA$${l.clientRate.toFixed(2)}/hr`;
+      }
+      setServiceLevelLabels(labels);
+    })
       .then(setRequest)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -46,12 +57,6 @@ export default function ReviewConfirm() {
     "2-3 hours": "2–3 hours",
     "4-6 hours": "4–6 hours",
     "more than 6 hours": "6+ hours",
-  };
-
-  const serviceLevelLabels = {
-    home_helper: "Home Helper — CA$24.25/hr",
-    care_services: "Care Services — CA$26.19/hr",
-    specialized_care: "Specialized Care — CA$27.84/hr",
   };
 
   return (

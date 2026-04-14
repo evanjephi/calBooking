@@ -1,16 +1,13 @@
 // frontend/src/pages/PSWBooking.jsx
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getPSWProfile, getBookingRequest, getPSWBookedSlots, checkPSWConflict, selectPSW, saveContact, confirmRequest, finalizeBooking } from "../api/api";
+import { getPSWProfile, getBookingRequest, getPSWBookedSlots, checkPSWConflict, selectPSW, saveContact, confirmRequest, finalizeBooking, getServiceLevels } from "../api/api";
 import { useAuth } from "../context/AuthContext";
 
 const MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-const SERVICE_LEVEL_INFO = {
-  home_helper: { label: "Help Around the House", rate: 24.25 },
-  care_services: { label: "Personal Care", rate: 26.19 },
-  specialized_care: { label: "Specialized Care", rate: 27.84 },
-};
+// Populated dynamically from API
+let SERVICE_LEVEL_INFO = {};
 
 const CC_FEE_RATE = 0.04;
 const HST_RATE = 0.13;
@@ -100,8 +97,14 @@ export default function PSWBooking() {
       getPSWProfile(pswId),
       getBookingRequest(reqId),
       getPSWBookedSlots(pswId, fromDate, toDate),
+      getServiceLevels(),
     ])
-      .then(([pswData, reqData, slotsData]) => {
+      .then(([pswData, reqData, slotsData, levelsData]) => {
+        // Build SERVICE_LEVEL_INFO from API data
+        const info = {};
+        for (const l of levelsData) info[l.key] = { label: l.label, rate: l.clientRate };
+        SERVICE_LEVEL_INFO = info;
+
         setPsw(pswData);
         if (pswData.serviceLevels?.length > 0) {
           setServiceLevel(pswData.serviceLevels[0]);
