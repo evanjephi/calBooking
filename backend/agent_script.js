@@ -1,5 +1,6 @@
 require('dotenv').config();
 const axios = require('axios');
+const mongoose = require('mongoose');
 
 const AGENT_ID = process.env.RETELL_AGENT_ID;
 const API_KEY  = process.env.RETELL_API_KEY;
@@ -24,7 +25,35 @@ const WEBHOOK_BASE_URL = process.env.WEBHOOK_BASE_URL;
 // Retell conversation flow nodes — uses exact Retell node schema:
 //   { id, name, type, start_speaker, instruction: { type, text }, edges: [{ id, condition, destination_node_id, transition_condition }] }
 
-const CONVERSATION_FLOW_NODES = [
+// Default fallback service level prompt text
+let serviceLevelPromptText = `Ask what level of care they need.
+Say: "We offer three levels of care:
+1. Home Helper — light housekeeping, meal prep, and companionship, at $24.25 per hour.
+2. Care Services — personal hygiene assistance, mobility support, and medication reminders, at $26.19 per hour.
+3. Specialized Care — complex care needs including palliative, dementia, or post-surgical support, at $27.84 per hour.
+Which level best fits your needs?"
+Only accept one of the listed service levels.
+If unclear, briefly describe each option again.`;
+
+// Called before building the flow to populate dynamic rates from DB
+async function loadServiceLevelPrompt() {
+  try {
+    const connectDB = require('./config/db');
+    await connectDB();
+    const ServiceLevel = require('./models/ServiceLevel');
+    const levels = await ServiceLevel.find({ active: true }).sort({ sortOrder: 1 }).lean();
+    if (levels.length) {
+      const options = levels.map((l, i) => `${i + 1}. ${l.label} — ${l.description || ''}, at $${l.clientRate.toFixed(2)} per hour.`).join('\n');
+      const names = levels.map(l => l.label).join(', ');
+      serviceLevelPromptText = `Ask what level of care they need.\nSay: "We offer ${levels.length} levels of care:\n${options}\nWhich level best fits your needs?"\nOnly accept one of: ${names}.\nIf unclear, briefly describe each option again.`;
+    }
+  } catch (e) {
+    console.log('Using fallback service level text:', e.message);
+  }
+}
+
+function getConversationFlowNodes() {
+  return [
   {
     id: "node_identify_caller",
     name: "Identify Caller",
@@ -151,14 +180,7 @@ Repeat the address back to confirm you got it right.`
     start_speaker: "agent",
     instruction: {
       type: "prompt",
-      text: `Ask what level of care they need.
-Say: "We offer three levels of care:
-1. Home Helper — light housekeeping, meal prep, and companionship, at $24.25 per hour.
-2. Care Services — personal hygiene assistance, mobility support, and medication reminders, at $26.19 per hour.
-3. Specialized Care — complex care needs including palliative, dementia, or post-surgical support, at $27.84 per hour.
-Which level best fits your needs?"
-Only accept one of these three: Home Helper, Care Services, or Specialized Care.
-If unclear, briefly describe each option again.`
+      text: serviceLevelPromptText
     },
     edges: [
       {
@@ -412,6 +434,7 @@ If they want to change something, ask which detail they'd like to change.`
     edges: []
   }
 ];
+}
 
 // ──────────────────────────────────────────────────────────────
 //  Post-call analysis — tells Retell what variables to extract
@@ -528,11 +551,15 @@ async function updateAgent() {
 async function updateConversationFlow() {
   console.log(`\n→ Updating conversation flow ${FLOW_ID} with booking nodes...`);
 
+  // Load dynamic service level rates from DB
+  await loadServiceLevelPrompt();
+  const nodes = getConversationFlowNodes();
+
   try {
     const response = await axios.patch(
       `${API_BASE}/update-conversation-flow/${FLOW_ID}`,
       {
-        nodes: CONVERSATION_FLOW_NODES,
+        nodes,
         starting_node_id: "node_identify_caller"
       },
       {
@@ -544,8 +571,8 @@ async function updateConversationFlow() {
     );
 
     console.log(`  Conversation flow updated: ${FLOW_ID}`);
-    console.log(`  Nodes: ${CONVERSATION_FLOW_NODES.length}`);
-    console.log(`  Flow: ${CONVERSATION_FLOW_NODES.map(n => n.name).join(" → ")}`);
+    console.log(`  Nodes: ${nodes.length}`);
+    console.log(`  Flow: ${nodes.map(n => n.name).join(" → ")}`);
 
     if (response.data?.nodes) {
       console.log(`  Retell confirmed ${response.data.nodes.length} nodes set`);
@@ -558,7 +585,7 @@ async function updateConversationFlow() {
     console.log("  Flow ID: " + FLOW_ID);
     console.log("\n  Node Setup Guide:");
     console.log("  ==================");
-    CONVERSATION_FLOW_NODES.forEach((node, i) => {
+    nodes.forEach((node, i) => {
       const edgeCount = (node.edges || []).length;
       console.log(`  ${i + 1}. [${node.name}] (${node.type}) — ${edgeCount} transition(s)`);
       if (node.instruction?.text) {

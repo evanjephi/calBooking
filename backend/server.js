@@ -13,6 +13,9 @@ require("./models/Post");
 require("./models/Page");
 require("./models/Image");
 require("./models/ChatSession");
+require("./models/ServiceLevel");
+const { getServiceLevels } = require("./controllers/serviceLevelController");
+const { seedServiceLevels } = require("./config/rates");
 const authRoutes = require("./routes/authRoutes");
 const pswRoutes = require("./routes/pswRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
@@ -49,6 +52,7 @@ app.use("/posts", postRoutes);
 app.use("/pages", pageRoutes);
 app.use("/chat", chatRoutes);
 app.get("/images/:id", serveImage);
+app.get("/service-levels", getServiceLevels);
 
 // ---------- Serve frontend SPA in production ----------
 const path = require("path");
@@ -78,6 +82,7 @@ const PORT = process.env.PORT || 5000;
   try {
     await connectDB();
     await buildCache();  // warm postal-code cache after DB is ready
+    await seedServiceLevels();  // ensure default service levels exist
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   } catch (error) {
     console.error("Failed to connect to MongoDB:", error);
