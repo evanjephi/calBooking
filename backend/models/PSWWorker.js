@@ -16,7 +16,6 @@ const pswWorkerSchema = new mongoose.Schema({
 
   serviceLevels: {
     type: [String],
-    enum: ["home_helper", "care_services", "specialized_care"],
     default: []
   },
 
