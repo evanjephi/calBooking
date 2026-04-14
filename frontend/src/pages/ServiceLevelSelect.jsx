@@ -1,45 +1,25 @@
 // frontend/src/pages/ServiceLevelSelect.jsx
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
-const SERVICE_LEVELS = [
-  {
-    value: "home_helper",
-    icon: "🏠",
-    label: "Help Around the House",
-    rate: 24.25,
-    description:
-      "Light housekeeping, meal preparation, companionship, and everyday living assistance.",
-    examples: "Cooking, cleaning, laundry, grocery shopping, friendly company",
-    popular: false,
-  },
-  {
-    value: "care_services",
-    icon: "💛",
-    label: "Personal Care",
-    rate: 26.19,
-    description:
-      "Hands-on personal care including hygiene help, mobility support, and medication reminders.",
-    examples: "Bathing, dressing, walking support, medication reminders",
-    popular: true,
-  },
-  {
-    value: "specialized_care",
-    icon: "⭐",
-    label: "Specialized Care",
-    rate: 27.84,
-    description:
-      "Advanced care for complex needs such as dementia, palliative support, or post-surgery recovery.",
-    examples: "Dementia care, palliative support, post-surgery help",
-    popular: false,
-  },
-];
+import { getServiceLevels } from "../api/api";
 
 export default function ServiceLevelSelect() {
   const navigate = useNavigate();
+  const [levels, setLevels] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getServiceLevels()
+      .then(setLevels)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   function handleSelect(level) {
-    navigate("/booking/location", { state: { serviceLevel: level.value, label: level.label, rate: level.rate } });
+    navigate("/booking/location", { state: { serviceLevel: level.key, label: level.label, rate: level.clientRate } });
   }
+
+  if (loading) return <p className="center-text">Loading…</p>;
 
   return (
     <>
@@ -50,9 +30,9 @@ export default function ServiceLevelSelect() {
 
       <div className="page">
         <div className="three-col">
-          {SERVICE_LEVELS.map((level) => (
+          {levels.map((level) => (
             <div
-              key={level.value}
+              key={level.key}
               className={`service-card ${level.popular ? "service-card-popular" : ""}`}
               onClick={() => handleSelect(level)}
               role="button"
@@ -60,11 +40,11 @@ export default function ServiceLevelSelect() {
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSelect(level); } }}
             >
               {level.popular && <div className="ribbon">Most Popular</div>}
-              <div className="service-card-icon">{level.icon}</div>
+              <div className="service-card-icon">{level.icon || "🏠"}</div>
               <h3>{level.label}</h3>
               <p>{level.description}</p>
-              <p className="service-card-examples">{level.examples}</p>
-              <div className="rate">CA${level.rate.toFixed(2)}</div>
+              {level.examples && <p className="service-card-examples">{level.examples}</p>}
+              <div className="rate">CA${level.clientRate.toFixed(2)}</div>
               <div className="rate-unit">per hour</div>
               <button className="btn btn-teal btn-block" onClick={(e) => { e.stopPropagation(); handleSelect(level); }}>
                 Choose This

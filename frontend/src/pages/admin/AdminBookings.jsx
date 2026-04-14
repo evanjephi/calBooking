@@ -1,14 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import {
   getAdminBookings, deleteAdminBooking, updateAdminBooking,
-  getAdminBookingRequests, deleteAdminBookingRequest
+  getAdminBookingRequests, deleteAdminBookingRequest,
+  getServiceLevels
 } from "../../api/api";
 
-const SERVICE_LEVEL_LABELS = {
-  home_helper: "Home Helper",
-  care_services: "Care Services",
-  specialized_care: "Specialized Care"
-};
+// Populated dynamically from API
+let SERVICE_LEVEL_LABELS = {};
 
 function formatAddress(addr) {
   if (!addr) return "—";
@@ -19,6 +17,14 @@ function formatAddress(addr) {
 // ── Main Component with Parent Tabs ──
 export default function AdminBookings() {
   const [parentTab, setParentTab] = useState("bookings");
+
+  useEffect(() => {
+    getServiceLevels().then(levels => {
+      const labels = {};
+      for (const l of levels) labels[l.key] = l.label;
+      SERVICE_LEVEL_LABELS = labels;
+    }).catch(() => {});
+  }, []);
 
   return (
     <div>
