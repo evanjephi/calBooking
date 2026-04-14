@@ -33,6 +33,7 @@ import AdminPageEdit from './pages/admin/AdminPageEdit'
 import AdminClients from './pages/admin/AdminClients'
 import AdminPSWs from './pages/admin/AdminPSWs'
 import AdminBookings from './pages/admin/AdminBookings'
+import AdminServiceLevels from './pages/admin/AdminServiceLevels'
 import AdminUsers from './pages/admin/AdminUsers'
 import PublicNav from './components/PublicNav'
 import Footer from './components/Footer'
@@ -109,6 +110,7 @@ function App() {
           <Route path="clients" element={<AdminClients />} />
           <Route path="psws" element={<AdminPSWs />} />
           <Route path="bookings" element={<AdminBookings />} />
+          <Route path="service-levels" element={<AdminServiceLevels />} />
           <Route path="users" element={<AdminUsers />} />
         </Route>
 

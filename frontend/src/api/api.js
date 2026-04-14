@@ -129,6 +129,15 @@ export const getAdminUsers = () => request("GET", "/admin/users");
 export const updateAdminUser = (id, body) => request("PUT", `/admin/users/${id}`, body);
 export const deleteAdminUser = (id) => request("DELETE", `/admin/users/${id}`);
 
+// ── Public: Service Levels ──
+export const getServiceLevels = () => request("GET", "/service-levels");
+
+// ── Admin: Service Levels ──
+export const getAdminServiceLevels = () => request("GET", "/admin/service-levels");
+export const createAdminServiceLevel = (body) => request("POST", "/admin/service-levels", body);
+export const updateAdminServiceLevel = (id, body) => request("PUT", `/admin/service-levels/${id}`, body);
+export const deleteAdminServiceLevel = (id) => request("DELETE", `/admin/service-levels/${id}`);
+
 // ── Admin: Images ──
 export const uploadImage = async (file) => {
   const formData = new FormData();
