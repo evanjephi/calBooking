@@ -23,7 +23,6 @@ const bookingRequestSchema = new mongoose.Schema(
 
   serviceLevel: {
     type: String,
-    enum: ["home_helper", "care_services", "specialized_care"],
     default: null
   },
 
