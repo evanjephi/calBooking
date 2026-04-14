@@ -3,6 +3,7 @@ const router = express.Router();
 const { body, param } = require("express-validator");
 const validate = require("../middleware/validate");
 const { requireAuth } = require("../middleware/auth");
+const ServiceLevel = require("../models/ServiceLevel");
 
 const {
   createBookingRequest,
@@ -63,8 +64,12 @@ router.post(
       .withMessage("specificDate must be a valid date"),
     body("serviceLevel")
       .optional({ nullable: true })
-      .isIn(["home_helper", "care_services", "specialized_care"])
-      .withMessage("serviceLevel must be home_helper, care_services, or specialized_care")
+      .custom(async (value) => {
+        if (!value) return true;
+        const exists = await ServiceLevel.findOne({ key: value, active: true });
+        if (!exists) throw new Error(`Invalid service level: ${value}`);
+        return true;
+      })
   ],
   validate,
   createBookingRequest

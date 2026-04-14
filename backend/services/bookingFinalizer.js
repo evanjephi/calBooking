@@ -5,7 +5,7 @@ const BookingRequest = require("../models/BookingRequest");
 const PSWWorker = require("../models/PSWWorker");
 const { matchPSWs } = require("./pswMatchingEngine");
 const { generateSlotTimes, TIME_RANGES, DURATION_HOURS } = require("./slotTimeGenerator");
-const { SERVICE_RATES } = require("../config/rates");
+const { getRateForLevel } = require("../config/rates");
 
 /**
  * Atomic conflict check — returns true if a conflict exists for this PSW
@@ -126,7 +126,7 @@ async function finalizeSinglePSW(request, opts) {
   const lastSlot = slotTimes[slotTimes.length - 1];
 
   // ── Billing calculation ──
-  const hourlyRate = SERVICE_RATES[request.serviceLevel] || null;
+  const hourlyRate = await getRateForLevel(request.serviceLevel);
   const totalHours = slotTimes.reduce((sum, t) => sum + (t.end - t.start) / 3600000, 0);
   const totalAmount = hourlyRate ? Math.round(hourlyRate * totalHours * 100) / 100 : null;
 
@@ -290,7 +290,7 @@ async function finalizeSplitBooking(request, opts) {
     const assignmentHours = assignment.slots.reduce((sum, s) => {
       return sum + (new Date(s.endTime) - new Date(s.startTime)) / 3600000;
     }, 0);
-    const hourlyRate = SERVICE_RATES[request.serviceLevel] || null;
+    const hourlyRate = await getRateForLevel(request.serviceLevel);
     const totalAmount = hourlyRate ? Math.round(hourlyRate * assignmentHours * 100) / 100 : null;
 
     const isRecurring = !isOneTime && (request.lengthOfCareWeeks || 1) > 1;

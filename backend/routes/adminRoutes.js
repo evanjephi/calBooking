@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { requireAuth, requireAdmin } = require("../middleware/auth");
 const admin = require("../controllers/adminController");
+const sl = require("../controllers/serviceLevelController");
 const { uploadMiddleware, uploadImage, deleteImage } = require("../controllers/imageController");
 
 // All admin routes require auth + admin role
@@ -52,6 +53,12 @@ router.delete("/users/:id", admin.deleteUser);
 // Booking Requests (pipeline tracking)
 router.get("/booking-requests", admin.getBookingRequests);
 router.delete("/booking-requests/:id", admin.deleteBookingRequest);
+
+// Service Levels
+router.get("/service-levels", sl.getAdminServiceLevels);
+router.post("/service-levels", sl.createServiceLevel);
+router.put("/service-levels/:id", sl.updateServiceLevel);
+router.delete("/service-levels/:id", sl.deleteServiceLevel);
 
 // Images
 router.post("/images", uploadMiddleware, uploadImage);
