@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { submitPSWApplication, getPSWApplication } from "../api/api";
+import { submitPSWApplication, getPSWApplication, getServiceLevels } from "../api/api";
 
 const CERTIFICATIONS = [
   "Personal Support Worker Certificate",
@@ -29,10 +29,10 @@ const LANGUAGES = [
   "Urdu", "Tamil", "Italian", "Korean", "Vietnamese"
 ];
 
-const SERVICE_LEVELS = [
-  { key: "home_helper", label: "Home Helper", rate: "CA$18.51/hr" },
-  { key: "care_services", label: "Care Services", rate: "CA$19.99/hr" },
-  { key: "specialized_care", label: "Specialized Care", rate: "CA$21.25/hr" }
+const SERVICE_LEVELS_FALLBACK = [
+  { key: "home_helper", label: "Home Helper", pswRate: 18.51 },
+  { key: "care_services", label: "Care Services", pswRate: 19.99 },
+  { key: "specialized_care", label: "Specialized Care", pswRate: 21.25 }
 ];
 
 export default function PSWApplication() {
@@ -42,6 +42,7 @@ export default function PSWApplication() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [existingApp, setExistingApp] = useState(null);
+  const [serviceLevelOptions, setServiceLevelOptions] = useState(SERVICE_LEVELS_FALLBACK);
 
   const [form, setForm] = useState({
     yearsExperience: "",
@@ -68,9 +69,15 @@ export default function PSWApplication() {
   const [availOpen, setAvailOpen] = useState(false);
 
   useEffect(() => {
-    getPSWApplication().then(data => {
-      if (data.hasApplication) {
-        setExistingApp(data.application);
+    Promise.all([
+      getPSWApplication(),
+      getServiceLevels()
+    ]).then(([appData, levelsData]) => {
+      if (appData.hasApplication) {
+        setExistingApp(appData.application);
+      }
+      if (levelsData?.length) {
+        setServiceLevelOptions(levelsData);
       }
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
@@ -334,11 +341,11 @@ export default function PSWApplication() {
           <div className="form-group">
             <label>What service level are you certified to perform? *</label>
             <div className="service-level-options">
-              {SERVICE_LEVELS.map(level => (
+              {serviceLevelOptions.map(level => (
                 <label key={level.key} className={`service-level-card ${form.serviceLevels.includes(level.key) ? "selected" : ""}`}>
                   <div className="service-level-header">
                     <span className="service-level-name">{level.label}</span>
-                    <span className="service-level-rate">{level.rate}</span>
+                    <span className="service-level-rate">CA${(level.pswRate || 0).toFixed(2)}/hr</span>
                   </div>
                   <small>Click ▼ and review services first</small>
                   <input

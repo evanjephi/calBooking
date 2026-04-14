@@ -4,19 +4,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { createBookingRequest } from "../api/api";
 import { useAuth } from "../context/AuthContext";
 
-const SERVICE_LEVEL_INFO = {
-  home_helper: { label: "Help Around the House", rate: 24.25 },
-  care_services: { label: "Personal Care", rate: 26.19 },
-  specialized_care: { label: "Specialized Care", rate: 27.84 },
-};
-
 export default function BookingLocation() {
   const navigate = useNavigate();
   const { state } = useLocation();
   const { user } = useAuth();
 
   const serviceLevel = state?.serviceLevel || "home_helper";
-  const slInfo = SERVICE_LEVEL_INFO[serviceLevel];
+  // Rate and label passed from ServiceLevelSelect via router state
+  const slInfo = { label: state?.label || serviceLevel, rate: state?.rate || 0 };
 
   // Pre-fill from user profile
   const hasProfileAddress = !!(user?.address?.street && user?.address?.postalCode);
