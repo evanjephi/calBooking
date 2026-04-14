@@ -9,6 +9,7 @@ const navItems = [
   { to: "/admin/clients", label: "Clients", icon: "👥" },
   { to: "/admin/psws", label: "PSW Workers", icon: "🏥" },
   { to: "/admin/bookings", label: "Bookings", icon: "📅" },
+  { to: "/admin/service-levels", label: "Service Levels", icon: "💰" },
   { to: "/admin/users", label: "Users", icon: "👤" },
 ];
 

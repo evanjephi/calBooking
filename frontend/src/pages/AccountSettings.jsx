@@ -115,7 +115,7 @@ export default function AccountSettings() {
               <input name="postalCode" value={form.postalCode} onChange={handleChange} />
             </div>
           </div>
-          <button type="submit" className="btn-primary" disabled={saving}>
+          <button type="submit" className="btn btn-teal btn-block" disabled={saving}>
             {saving ? "Saving…" : "Save Changes"}
           </button>
         </form>
@@ -140,7 +140,7 @@ export default function AccountSettings() {
               <input type="password" value={pw.confirmPassword} onChange={e => setPw({ ...pw, confirmPassword: e.target.value })} required minLength={6} />
             </div>
           </div>
-          <button type="submit" className="btn-primary" disabled={changingPw}>
+          <button type="submit" className="btn btn-teal btn-block" disabled={changingPw}>
             {changingPw ? "Changing…" : "Change Password"}
           </button>
         </form>
