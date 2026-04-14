@@ -4,6 +4,7 @@ const Booking = require("../models/Booking");
 const BookingSlot = require("../models/BookingSlot");
 const Client = require("../models/Client");
 const User = require("../models/User");
+const ServiceLevel = require("../models/ServiceLevel");
 const { matchPSWs } = require("../services/pswMatchingEngine");
 const { finalizeBookingRequest } = require("../services/bookingFinalizer");
 const { generateSlotTimes } = require("../services/slotTimeGenerator");
@@ -183,7 +184,7 @@ exports.handleBookingCallWebhook = async (req, res) => {
 
     if (analysis.city && analysis.postal_code) {
       console.log(`[Webhook] Using structured analysis data`);
-      bookingData = buildFromAnalysis(analysis, metadata);
+      bookingData = await buildFromAnalysis(analysis, metadata);
     } else if (transcript) {
       console.log(`[Webhook] Falling back to transcript parsing`);
       bookingData = parseBookingFromTranscript(transcript, metadata);
@@ -524,7 +525,7 @@ exports.lookupPSWsByPostalCode = async (req, res) => {
 // ══════════════════════════════════════════════════════════════
 
 // ── PRIMARY: Build from Retell's structured analysis data ────
-function buildFromAnalysis(analysis, metadata) {
+async function buildFromAnalysis(analysis, metadata) {
   const postalRaw = (analysis.postal_code || "").toUpperCase().replace(/\s/g, "");
   const postalCode = postalRaw.length === 6
     ? postalRaw.slice(0, 3) + " " + postalRaw.slice(3)
@@ -563,17 +564,27 @@ function buildFromAnalysis(analysis, metadata) {
     serviceLevel: null
   };
 
-  // Normalise service_level
+  // Normalise service_level against DB-driven levels
   const rawLevel = (analysis.service_level || "").toLowerCase().replace(/[\s-]+/g, "_");
-  const validLevels = ["home_helper", "care_services", "specialized_care"];
-  if (validLevels.includes(rawLevel)) {
-    result.serviceLevel = rawLevel;
-  } else if (rawLevel.includes("home")) {
-    result.serviceLevel = "home_helper";
-  } else if (rawLevel.includes("specialized") || rawLevel.includes("special")) {
-    result.serviceLevel = "specialized_care";
-  } else if (rawLevel.includes("care")) {
-    result.serviceLevel = "care_services";
+  try {
+    const activeLevels = await ServiceLevel.find({ active: true }).select("key label").lean();
+    const validKeys = activeLevels.map(l => l.key);
+    if (validKeys.includes(rawLevel)) {
+      result.serviceLevel = rawLevel;
+    } else {
+      // Fuzzy match by checking if the raw level text is contained in any key or label
+      const match = activeLevels.find(l =>
+        rawLevel.includes(l.key) || l.key.includes(rawLevel) ||
+        l.label.toLowerCase().replace(/[\s-]+/g, "_").includes(rawLevel) ||
+        rawLevel.includes(l.label.toLowerCase().replace(/[\s-]+/g, "_"))
+      );
+      if (match) result.serviceLevel = match.key;
+    }
+  } catch {
+    // Fallback to static matching if DB unavailable
+    if (rawLevel.includes("home")) result.serviceLevel = "home_helper";
+    else if (rawLevel.includes("specialized") || rawLevel.includes("special")) result.serviceLevel = "specialized_care";
+    else if (rawLevel.includes("care")) result.serviceLevel = "care_services";
   }
 
   result.isValid = !!(
