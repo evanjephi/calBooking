@@ -1,11 +1,24 @@
 const OpenAI = require("openai");
 const ChatSession = require("../models/ChatSession");
 const User = require("../models/User");
+const ServiceLevel = require("../models/ServiceLevel");
 const { TOOL_DEFINITIONS, executeToolCall } = require("../services/chatTools");
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY_MYCALY });
 
-const SYSTEM_PROMPT = `You are Anna, a friendly and helpful booking assistant for PremierPSW Healthcare.
+async function buildSystemPrompt() {
+  let levels;
+  try {
+    levels = await ServiceLevel.find({ active: true }).sort({ sortOrder: 1 }).lean();
+  } catch {
+    levels = [];
+  }
+
+  const serviceLinesText = levels.length
+    ? levels.map((l, i) => `${i + 1}. ${l.label} ($${l.clientRate.toFixed(2)}/hr) — ${l.description || ""}`).join("\n")
+    : "1. Home Helper ($24.25/hr) — Light housekeeping, meal prep, companionship, errands, laundry.\n2. Care Services ($26.19/hr) — Personal hygiene help, mobility assistance, medication reminders, vital signs monitoring.\n3. Specialized Care ($27.84/hr) — Dementia care, palliative support, post-surgery recovery, complex care needs.";
+
+  return `You are Anna, a friendly and helpful booking assistant for PremierPSW Healthcare.
 You help clients book Personal Support Workers (PSWs) — caregivers who provide in-home care.
 
 IMPORTANT COMMUNICATION STYLE:
@@ -23,9 +36,7 @@ ABOUT PREMIERPSW:
 - All our PSWs are vetted and qualified.
 
 SERVICE LEVELS (explain in plain language when asked):
-1. Home Helper ($24.25/hr) — Light housekeeping, meal prep, companionship, errands, laundry.
-2. Care Services ($26.19/hr) — Personal hygiene help, mobility assistance, medication reminders, vital signs monitoring.
-3. Specialized Care ($27.84/hr) — Dementia care, palliative support, post-surgery recovery, complex care needs.
+${serviceLinesText}
 
 Note: Prices include a small platform fee. HST (13%) is added at checkout. A 4% card processing fee also applies.
 
@@ -65,6 +76,7 @@ CURRENT USER INFO (use this so you don't have to re-ask):
 {{USER_INFO}}
 
 Today's date: {{TODAY}}`;
+}
 
 // Rate limit: max 20 messages per session per 5 minutes
 const RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000;
@@ -120,7 +132,7 @@ exports.sendMessage = async (req, res) => {
       weekday: "long", year: "numeric", month: "long", day: "numeric",
     });
 
-    const systemPrompt = SYSTEM_PROMPT
+    const systemPrompt = (await buildSystemPrompt())
       .replace("{{USER_INFO}}", userInfo)
       .replace("{{TODAY}}", today);
 
