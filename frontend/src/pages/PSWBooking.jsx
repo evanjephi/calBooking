@@ -7,6 +7,7 @@ import { useAuth } from "../context/AuthContext";
 const MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 // Populated dynamically from API
+const DEFAULT_SL = { label: "Loading…", rate: 0 };
 let SERVICE_LEVEL_INFO = {};
 
 const CC_FEE_RATE = 0.04;
@@ -127,7 +128,7 @@ export default function PSWBooking() {
       .finally(() => setLoading(false));
   }, [pswId, reqId]);
 
-  const slInfo = SERVICE_LEVEL_INFO[serviceLevel] || SERVICE_LEVEL_INFO.home_helper;
+  const slInfo = SERVICE_LEVEL_INFO[serviceLevel] || SERVICE_LEVEL_INFO.home_helper || DEFAULT_SL;
 
   // Check if a specific hour on a date is booked (uses backend's pre-computed local hours)
   function isHourBooked(date, hour) {
