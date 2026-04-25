@@ -2,7 +2,7 @@ const OpenAI = require("openai");
 const ChatSession = require("../models/ChatSession");
 const User = require("../models/User");
 const ServiceLevel = require("../models/ServiceLevel");
-const { TOOL_DEFINITIONS, executeToolCall } = require("../services/chatTools");
+const { getToolDefinitions, executeToolCall } = require("../services/chatTools");
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY_MYCALY });
 
@@ -140,6 +140,7 @@ exports.sendMessage = async (req, res) => {
     session.messages.push({ role: "user", content: message.trim() });
 
     // Build messages for OpenAI (prepend system prompt)
+    const toolDefs = await getToolDefinitions();
     const openaiMessages = [
       { role: "system", content: systemPrompt },
       ...session.messages.map((m) => {
@@ -155,7 +156,7 @@ exports.sendMessage = async (req, res) => {
     let response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: openaiMessages,
-      tools: TOOL_DEFINITIONS,
+      tools: toolDefs,
       tool_choice: "auto",
       temperature: 0.7,
       max_tokens: 800,
@@ -221,7 +222,7 @@ exports.sendMessage = async (req, res) => {
       response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: updatedMessages,
-        tools: TOOL_DEFINITIONS,
+        tools: toolDefs,
         tool_choice: "auto",
         temperature: 0.7,
         max_tokens: 800,
