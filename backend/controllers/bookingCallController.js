@@ -63,7 +63,7 @@ async function retellAPI(endpoint, method = "GET", data = null) {
 }
 
 // ── FSA → coordinate map for postal-code geo lookup ──────────
-const { geocodePostalCode } = require("../services/geocoder");
+const { geocodePostalCode, FSA_COORDINATES } = require("../services/geocoder");
 
 // ── POST /booking-calls/initiate ─────────────────────────────
 exports.initiateBookingCall = async (req, res) => {
@@ -552,7 +552,7 @@ async function buildFromAnalysis(analysis, metadata) {
     clientId: metadata?.client_id || null,
     city: analysis.city || null,
     postalCode,
-    coordinates: POSTAL_COORDINATES[fsa] || null,
+    coordinates: FSA_COORDINATES[fsa] || null,
     daysPerWeek: isNaN(daysPerWeek) ? null : daysPerWeek,
     timeOfDay,
     visitDuration,
@@ -636,7 +636,7 @@ function parseBookingFromTranscript(transcript, metadata) {
   if (postalMatch) {
     const raw = postalMatch[0].toUpperCase().replace(/\s/g, "");
     result.postalCode = raw.slice(0, 3) + " " + raw.slice(3);
-    result.coordinates = POSTAL_COORDINATES[raw.slice(0, 3)] || null;
+    result.coordinates = FSA_COORDINATES[raw.slice(0, 3)] || null;
   }
 
   // DAYS PER WEEK
