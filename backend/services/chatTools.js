@@ -1,13 +1,21 @@
 const BookingRequest = require("../models/BookingRequest");
 const Booking = require("../models/Booking");
 const User = require("../models/User");
+const ServiceLevel = require("../models/ServiceLevel");
 const { matchPSWs } = require("./pswMatchingEngine");
 const { finalizeBookingRequest } = require("./bookingFinalizer");
 const { geocodePostalCode } = require("./geocoder");
 
-// ── Tool definitions for OpenAI function calling ──
+// ── Build tool definitions dynamically from DB service levels ──
 
-const TOOL_DEFINITIONS = [
+async function getToolDefinitions() {
+  let serviceLevelEnum = ["home_helper", "care_services", "specialized_care"]; // fallback
+  try {
+    const levels = await ServiceLevel.find({ active: true }).select("key").lean();
+    if (levels.length) serviceLevelEnum = levels.map(l => l.key);
+  } catch { /* use fallback */ }
+
+  return [
   {
     type: "function",
     function: {
@@ -19,7 +27,7 @@ const TOOL_DEFINITIONS = [
         properties: {
           serviceLevel: {
             type: "string",
-            enum: ["home_helper", "care_services", "specialized_care"],
+            enum: serviceLevelEnum,
             description: "The care level needed.",
           },
           bookingType: {
@@ -139,6 +147,7 @@ const TOOL_DEFINITIONS = [
     },
   },
 ];
+}
 
 // ── Tool executors ──
 
@@ -354,4 +363,4 @@ async function execCancelBooking(args, userId) {
   return { success: true, message: "Booking has been cancelled." };
 }
 
-module.exports = { TOOL_DEFINITIONS, executeToolCall };
+module.exports = { getToolDefinitions, executeToolCall };
